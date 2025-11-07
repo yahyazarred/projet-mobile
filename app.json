@@ -41,7 +41,8 @@
           "project": "jsm_reactnative_food-ordering",
           "organization": "jsmpro"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
