@@ -1,3 +1,5 @@
+// @ts-ignore
+
 import { ID } from "react-native-appwrite";
 import { appwriteConfig, databases, storage } from "./appwrite";
 import dummyData from "./data";
@@ -12,7 +14,6 @@ interface Customization {
     price: number;
     type: "topping" | "side" | "size" | "crust" | string; // extend as needed
 }
-
 interface MenuItem {
     name: string;
     description: string;
@@ -51,7 +52,7 @@ async function clearStorage(): Promise<void> {
     const list = await storage.listFiles(appwriteConfig.bucketId);
 
     await Promise.all(
-        list.files.map((file) =>
+        list.files.map((file: { $id: any; }) =>
             storage.deleteFile(appwriteConfig.bucketId, file.$id)
         )
     );

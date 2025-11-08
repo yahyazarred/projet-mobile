@@ -1,104 +1,111 @@
-import {Account, Avatars, Client, Databases, ID, Query} from "react-native-appwrite";
-import {SignInParams} from "@/type";
+import { Account, Avatars, Client, Databases, ID, Query, Storage } from "react-native-appwrite";
+import { GetMenuParams, SignInParams } from "@/type";
 
 export const appwriteConfig = {
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!,
     projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
     platform: "com.jsm.foodordering",
-    databaseId: '690eec0400324d34c0fd',
-    userCollectionId: '690eecfa00230183b929',
+    databaseId: "690eec0400324d34c0fd",
+    bucketId: "690f2cab003a6a0c1732",
+    userCollectionId: "690eecfa00230183b929",
+    categoriesCollectionId: "690f01430038609662f1",
+    menuCollectionId: "690f022a0017c3ea19ac",
+    customizationsCollectionId: "690f26a50011cee4d4e7",
+    menuCustomizationsCollectionId: "690f28e9003ad689bf3a",
+};
 
-}
-
-export const client = new Client();
+const client = new Client();
 
 client
     .setEndpoint(appwriteConfig.endpoint)
     .setProject(appwriteConfig.projectId)
-    .setPlatform(appwriteConfig.platform)
+    .setPlatform(appwriteConfig.platform);
 
 export const account = new Account(client);
 export const databases = new Databases(client);
-const avatars = new Avatars(client);
+export const storage = new Storage(client);
+export const avatars = new Avatars(client);
 
-// @ts-ignore
-export const createUser = async ({ email, password, name }: CreateUserParams) => {
+export const createUser = async ({ email, password, name }: any) => {
     try {
-        const newAccount = await account.create(ID.unique(), email, password, name)
-        if(!newAccount) throw Error;
+        const newAccount = await account.create(ID.unique(), email, password, name);
+        if (!newAccount) throw new Error("Account creation failed");
 
         await signIn({ email, password });
-
         const avatarUrl = avatars.getInitialsURL(name);
 
         return await databases.createDocument(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
             ID.unique(),
-            { email, name, accountId: newAccount.$id, avatar: avatarUrl }
+            {
+                email,
+                name,
+                accountId: newAccount.$id,
+                avatar: avatarUrl,
+            }
         );
     } catch (e) {
-        throw new Error(e as string);
+        console.error("Create user error:", e);
+        throw e;
     }
-}
+};
 
 export const signIn = async ({ email, password }: SignInParams) => {
     try {
-        const session = await account.createEmailPasswordSession(email, password);
+        return await account.createEmailPasswordSession(email, password);
     } catch (e) {
-        throw new Error(e as string);
+        console.error("Sign-in error:", e);
+        throw e;
     }
-}
+};
+
 export const getCurrentUser = async () => {
     try {
         const currentAccount = await account.get();
-        if(!currentAccount) throw Error;
+        if (!currentAccount) throw new Error("No account found");
 
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            [Query.equal('accountId', currentAccount.$id)]
-        )
-
-        if(!currentUser) throw Error;
+            [Query.equal("accountId", currentAccount.$id)]
+        );
 
         return currentUser.documents[0];
     } catch (e) {
-        console.log(e);
-        throw new Error(e as string);
+        console.error("Get current user error:", e);
+        throw e;
     }
-}
+};
 
 export const getMenu = async ({ category, query }: GetMenuParams) => {
     try {
-        const queries: string[] = [];
-
-        if(category) queries.push(Query.equal('categories', category));
-        if(query) queries.push(Query.search('name', query));
+        const queries: any[] = [];
+        if (category) queries.push(Query.equal("categories", category));
+        if (query) queries.push(Query.search("name", query));
 
         const menus = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.menuCollectionId,
-            queries,
-        )
+            queries
+        );
 
         return menus.documents;
     } catch (e) {
-        throw new Error(e as string);
+        console.error("Get menu error:", e);
+        throw e;
     }
-}
+};
 
 export const getCategories = async () => {
     try {
         const categories = await databases.listDocuments(
             appwriteConfig.databaseId,
-            appwriteConfig.categoriesCollectionId,
-        )
-
+            appwriteConfig.categoriesCollectionId
+        );
         return categories.documents;
     } catch (e) {
-        throw new Error(e as string);
+        console.error("Get categories error:", e);
+        throw e;
     }
-}
-
-
+};
