@@ -5,15 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="25556cee-f7b2-4b2a-867e-358e6ab1b6f9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/(tabs)/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/CartItem.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/CustomHeader.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/store/cart.store.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/10.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/11zustand.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/12.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/1modernReactSnippets.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/2appwrite.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/3rdstep.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/4pastedotenv.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/5createdatabase.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/6modifyIdDB.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/7createTable.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/8usertable.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/9sentry.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/cart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/cart.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/CartButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CartButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/MenuCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MenuCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/appwrite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/appwrite.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/type.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/type.d.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -30,6 +40,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -50,8 +63,10 @@
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/adrianhajdin/repositories/fast_food&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -60,7 +75,7 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/adrianhajdin/repositories/fast_food/node_modules/typescript/lib&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\missb\\OneDrive\\Bureau\\3eme lig\\mob\\node_modules\\typescript\\lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -75,7 +90,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-WS-251.26927.40" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.27397.92" />
       </set>
     </attachedChunks>
   </component>
@@ -111,6 +126,8 @@
       <workItem from="1751457324448" duration="1767000" />
       <workItem from="1751481929876" duration="3696000" />
       <workItem from="1751575494623" duration="3698000" />
+      <workItem from="1762546160012" duration="6676000" />
+      <workItem from="1762585051899" duration="4409000" />
     </task>
     <servers />
   </component>
@@ -122,7 +139,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/lib/appwrite.ts</url>
-          <line>18</line>
+          <line>14</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">

@@ -38,8 +38,8 @@
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
-          "project": "jsm_reactnative_food-ordering",
-          "organization": "jsmpro"
+          "project": "react-native",
+          "organization": "munchly"
         }
       ],
       "expo-font"

@@ -34,7 +34,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.6",
-    "react-native-appwrite": "^0.10.0",
+    "react-native-appwrite": "^0.10.1",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "^5.4.0",
@@ -43,7 +43,7 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "use-debounce": "^10.0.5",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

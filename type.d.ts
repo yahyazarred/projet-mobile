@@ -105,3 +105,6 @@ interface GetMenuParams {
     category: string;
     query: string;
 }
+
+export class CreateUserParams {
+}
