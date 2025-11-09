@@ -11,60 +11,44 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import useAppwrite from "@/lib/useAppwrite";
-import { getCurrentUser, updateUser, logout } from "@/lib/appwrite";
+import { getCurrentUser, updateUser, logout, account } from "@/lib/appwrite";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 
 const Profile = () => {
-    // Real hook (kept) but we provide a mock fallback for dev
-    const { data: realUser, loading, refetch } = useAppwrite({ fn: getCurrentUser });
-
-    // ---- TEMP DEV MOCK USER ----
-    const DEV_USE_MOCK = true;
-
-    const mockUser = {
-        $id: "dev-mock-1",
-        name: "Dev Tester",
-        email: "dev@example.com",
-        phone: "+1 555 000 000",
-        addressHome: "123 Dev Street",
-        addressWork: "456 Work Ave",
-        avatar: "https://i.pravatar.cc/150?img=5",
-    };
-
-    // whichever is available: realUser (if auth works) or mockUser
-    const user = DEV_USE_MOCK ? mockUser : realUser;
+    const { data: user, loading, refetch } = useAppwrite({ fn: getCurrentUser });
 
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState({
         name: "",
         email: "",
-        phone: "",
-        addressHome: "",
-        addressWork: "",
     });
 
-    // Populate form when user loads
     useEffect(() => {
         if (user) {
             setForm({
                 name: user.name || "",
                 email: user.email || "",
-                phone: user.phone || "",
-                addressHome: user.addressHome || "",
-                addressWork: user.addressWork || "",
             });
         }
     }, [user]);
 
     const saveChanges = async () => {
-        if (!user) return; // TypeScript safe guard
+        if (!user) return;
+
         try {
-            await updateUser(user.$id, form);
+            // Update only the name
+            if (form.name !== user.name) {
+                await account.updateName(form.name);
+                await updateUser(user.$id, { name: form.name });
+            }
+
             await refetch();
             setIsEditing(false);
+            alert("Profile updated successfully!");
         } catch (error: any) {
             console.error("Update error:", error);
+            alert("Failed to update profile.");
         }
     };
 
@@ -86,7 +70,6 @@ const Profile = () => {
 
     return (
         <SafeAreaView className="flex-1">
-            {/* Page background */}
             <ImageBackground
                 source={require("@/assets/profile-bg.jpg")}
                 className="flex-1"
@@ -111,15 +94,14 @@ const Profile = () => {
                         />
                     </View>
 
-                    {/* Profile Form with background */}
+                    {/* Profile Form */}
                     <ImageBackground
                         source={require("@/assets/form.jpg")}
                         className="rounded-2xl p-5 shadow-sm overflow-hidden"
                         resizeMode="cover"
                         imageStyle={{ opacity: 0.5 }}
-
                     >
-                        {/* Full Name */}
+                        {/* Name */}
                         <View className="mb-4">
                             <Text className="text-white text-sm">Full Name</Text>
                             {isEditing ? (
@@ -133,67 +115,17 @@ const Profile = () => {
                             )}
                         </View>
 
-                        {/* Email */}
+                        {/* Email (read-only) */}
                         <View className="mb-4">
                             <Text className="text-white text-sm">Email</Text>
-                            {isEditing ? (
-                                <TextInput
-                                    className="text-gray-800 text-base font-semibold border-b border-gray-300"
-                                    value={form.email}
-                                    onChangeText={(text) => setForm({ ...form, email: text })}
-                                />
-                            ) : (
-                                <Text className="text-gray-800 text-base font-semibold">{user.email}</Text>
-                            )}
-                        </View>
-
-                        {/* Phone */}
-                        <View className="mb-4">
-                            <Text className="text-white text-sm">Phone</Text>
-                            {isEditing ? (
-                                <TextInput
-                                    className="text-gray-800 text-base font-semibold border-b border-gray-300"
-                                    value={form.phone}
-                                    onChangeText={(text) => setForm({ ...form, phone: text })}
-                                />
-                            ) : (
-                                <Text className="text-gray-800 text-base font-semibold">{user.phone}</Text>
-                            )}
-                        </View>
-
-                        {/* Address Home */}
-                        <View className="mb-4">
-                            <Text className="text-white text-sm">Address Home</Text>
-                            {isEditing ? (
-                                <TextInput
-                                    className="text-gray-800 text-base font-semibold border-b border-gray-300"
-                                    value={form.addressHome}
-                                    onChangeText={(text) => setForm({ ...form, addressHome: text })}
-                                />
-                            ) : (
-                                <Text className="text-gray-800 text-base font-semibold">{user.addressHome}</Text>
-                            )}
-                        </View>
-
-                        {/* Address Work */}
-                        <View className="mb-4">
-                            <Text className="text-white text-sm">Address Work</Text>
-                            {isEditing ? (
-                                <TextInput
-                                    className="text-gray-800 text-base font-semibold border-b border-gray-300"
-                                    value={form.addressWork}
-                                    onChangeText={(text) => setForm({ ...form, addressWork: text })}
-                                />
-                            ) : (
-                                <Text className="text-gray-800 text-base font-semibold">{user.addressWork}</Text>
-                            )}
+                            <Text className="text-gray-800 text-base font-semibold">{user.email}</Text>
                         </View>
 
                         {/* Buttons */}
                         <View className="mt-8 space-y-3">
                             {isEditing ? (
                                 <ImageBackground
-                                    source={require("@/assets/save.jpg")} // ✅ background for Save button
+                                    source={require("@/assets/save.jpg")}
                                     resizeMode="cover"
                                     imageStyle={{ borderRadius: 16, opacity: 0.8 }}
                                     className="rounded-2xl overflow-hidden mb-3"
@@ -210,7 +142,7 @@ const Profile = () => {
                                 </ImageBackground>
                             ) : (
                                 <ImageBackground
-                                    source={require("@/assets/save.jpg")} // ✅ background for Edit button
+                                    source={require("@/assets/save.jpg")}
                                     resizeMode="cover"
                                     imageStyle={{ borderRadius: 16, opacity: 0.8 }}
                                     className="rounded-2xl overflow-hidden mb-3"
@@ -228,7 +160,7 @@ const Profile = () => {
                             )}
 
                             <ImageBackground
-                                source={require("@/assets/logout.jpg")} // ✅ background for Logout button
+                                source={require("@/assets/logout.jpg")}
                                 resizeMode="cover"
                                 imageStyle={{ borderRadius: 16, opacity: 0.8 }}
                                 className="rounded-2xl overflow-hidden mb-3"
@@ -237,7 +169,7 @@ const Profile = () => {
                                     className="py-3 rounded-2xl"
                                     onPress={async () => {
                                         await logout();
-                                        router.replace("/(auth)/sign-in");
+                                        router.replace("../(auth)/sign-in");
                                     }}
                                     activeOpacity={0.8}
                                 >
@@ -247,7 +179,6 @@ const Profile = () => {
                                 </TouchableOpacity>
                             </ImageBackground>
                         </View>
-
                     </ImageBackground>
                 </ScrollView>
             </ImageBackground>
