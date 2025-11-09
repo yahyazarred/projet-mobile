@@ -17,7 +17,11 @@ const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
 export default function TabLayout() {
     const { isAuthenticated } = useAuthStore();
 
-    if(!isAuthenticated) return <Redirect href="/sign-in" />
+// ---- TEMP DEV BYPASS: set to `true` to skip auth checks ----
+    const DEV_BYPASS_AUTH = true;
+
+    if (!DEV_BYPASS_AUTH && !isAuthenticated) return <Redirect href="/sign-in" />
+
 
     return (
         <Tabs screenOptions={{

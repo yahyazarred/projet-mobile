@@ -1,33 +1,39 @@
-import {View, Text, Button, Alert} from 'react-native'
-import {Link, router} from "expo-router";
+import { View, Text, Alert } from "react-native";
+import { Link, router } from "expo-router";
 import CustomInput from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
-import {useState} from "react";
-import {signIn} from "@/lib/appwrite";
-import * as Sentry from '@sentry/react-native'
+import { useState } from "react";
+import { signIn, logout } from "@/lib/appwrite";
 
 const SignIn = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [form, setForm] = useState({ email: '', password: '' });
+    const [form, setForm] = useState({ email: "", password: "" });
 
     const submit = async () => {
         const { email, password } = form;
 
-        if(!email || !password) return Alert.alert('Error', 'Please enter valid email address & password.');
+        if (!email || !password) {
+            return Alert.alert("Error", "Please enter valid email address & password.");
+        }
 
-        setIsSubmitting(true)
+        setIsSubmitting(true);
 
         try {
+            // Clear any existing session to prevent conflicts
+            await logout().catch(() => null);
+
+            // Create a new session
             await signIn({ email, password });
 
-            router.replace('/');
-        } catch(error: any) {
-            Alert.alert('Error', error.message);
-            Sentry.captureEvent(error);
+            // Redirect to home
+            router.replace("/");
+        } catch (error: any) {
+            Alert.alert("Error", error.message);
+            console.error("SignIn error:", error);
         } finally {
             setIsSubmitting(false);
         }
-    }
+    };
 
     return (
         <View className="gap-10 bg-white rounded-lg p-5 mt-5">
@@ -43,25 +49,19 @@ const SignIn = () => {
                 value={form.password}
                 onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
                 label="Password"
-                secureTextEntry={true}
+                secureTextEntry
             />
 
-            <CustomButton
-                title="Sign In"
-                isLoading={isSubmitting}
-                onPress={submit}
-            />
+            <CustomButton title="Sign In" isLoading={isSubmitting} onPress={submit} />
 
             <View className="flex justify-center mt-5 flex-row gap-2">
-                <Text className="base-regular text-gray-100">
-                    Don't have an account?
-                </Text>
+                <Text className="base-regular text-gray-100">Don't have an account?</Text>
                 <Link href="/sign-up" className="base-bold text-primary">
                     Sign Up
                 </Link>
             </View>
         </View>
-    )
-}
+    );
+};
 
-export default SignIn
+export default SignIn;

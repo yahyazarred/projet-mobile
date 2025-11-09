@@ -22,6 +22,10 @@ const Search = () => {
         refetch({ category, query, limit: 6})
     }, [category, query]);
 
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
     return (
         <SafeAreaView className="bg-white h-full">
             <FlatList
