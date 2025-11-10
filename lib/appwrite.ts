@@ -91,55 +91,37 @@ export const updateUser = async (userId: string, data: any) => {
 };
 
 // ================= FIXED getMenu =================
-export const getMenu = async ({
-                                  category,
-                                  query,
-                                  limit = 6,
-                              }: GetMenuParams & { limit?: number }): Promise<MenuItem[]> => {
+export const getMenu = async ({ category, query }: GetMenuParams) => {
     try {
-        const queries: any[] = [];
-        if (category) queries.push(Query.equal("categories", category));
-        if (query) queries.push(Query.search("name", query));
+        const queries: string[] = [];
 
-        const res = await databases.listDocuments(
+        if(category) queries.push(Query.equal('categories', category));
+        if(query) queries.push(Query.search('name', query));
+
+        const menus = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.menuCollectionId,
-            queries
-        );
+            queries,
+        )
 
-        // Map raw documents to typed MenuItem[]
-        return res.documents.map((doc: Models.Document) => ({
-            ...doc,
-            name: doc.name,
-            price: doc.price,
-            image_url: doc.image_url,
-            description: doc.description,
-            calories: doc.calories,
-            protein: doc.protein,
-            rating: doc.rating,
-            type: doc.type,
-        }));
+        return menus.documents;
     } catch (e) {
-        console.error("Get menu error:", e);
-        throw e;
+        throw new Error(e as string);
     }
-};
+}
+
 
 // ================= FIXED getCategories =================
-export const getCategories = async (): Promise<Category[]> => {
-    try {
-        const res = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.categoriesCollectionId
-        );
 
-        return res.documents.map((doc: Models.Document) => ({
-            ...doc,
-            name: doc.name,
-            description: doc.description,
-        }));
+export const getCategories = async () => {
+    try {
+        const categories = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.categoriesCollectionId,
+        )
+
+        return categories.documents;
     } catch (e) {
-        console.error("Get categories error:", e);
-        throw e;
+        throw new Error(e as string);
     }
-};
+}
