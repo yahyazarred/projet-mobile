@@ -1,45 +1,59 @@
-import {FlatList, Text, View} from 'react-native'
-import {SafeAreaView} from "react-native-safe-area-context";
+import { FlatList, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import useAppwrite from "@/lib/useAppwrite";
-import {getCategories, getMenu} from "@/lib/appwrite";
-import {useLocalSearchParams} from "expo-router";
-import {useEffect} from "react";
+import { getCategories, getMenu } from "@/lib/appwrite";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useMemo } from "react";
 import CartButton from "@/components/CartButton";
 import cn from "clsx";
 import MenuCard from "@/components/MenuCard";
-import {MenuItem} from "@/type";
+import { MenuItem, Category } from "@/type";
 
 import Filter from "@/components/Filter";
 import SearchBar from "@/components/SearchBar";
 
 const Search = () => {
-    const { category, query } = useLocalSearchParams<{query: string; category: string}>()
+    const { category, query } = useLocalSearchParams<{ query: string; category: string }>();
 
-    const { data, refetch, loading } = useAppwrite({ fn: getMenu, params: { category,  query,  limit: 6, } });
-    const { data: categories } = useAppwrite({ fn: getCategories });
+    // Memoize search params to prevent infinite loop
+    const searchParams = useMemo(() => ({ category, query, limit: 6 }), [category, query]);
+
+    // Fetch menu items
+    const { data: menuItems, refetch, loading } = useAppwrite<MenuItem[], { category: string; query: string; limit: number }>({
+        fn: getMenu,
+        params: searchParams,
+    });
+
+    // Fetch categories
+    const { data: categories } = useAppwrite<Category[]>({ fn: getCategories });
+
+    // Prevent unnecessary refetches
+    const prevParams = useRef(searchParams);
 
     useEffect(() => {
-        refetch({ category, query, limit: 6})
-    }, [category, query]);
+        if (
+            prevParams.current.category !== category ||
+            prevParams.current.query !== query
+        ) {
+            prevParams.current = { category, query, limit: 6 };
+            refetch({ category, query, limit: 6 });
+        }
+    }, [category, query, refetch]);
 
-    // @ts-ignore
-    // @ts-ignore
-    // @ts-ignore
-    // @ts-ignore
     return (
         <SafeAreaView className="bg-white h-full">
             <FlatList
-                data={data}
+                data={menuItems}
                 renderItem={({ item, index }) => {
                     const isFirstRightColItem = index % 2 === 0;
 
                     return (
-                        <View className={cn("flex-1 max-w-[48%]", !isFirstRightColItem ? 'mt-10': 'mt-0')}>
-                            <MenuCard item={item as MenuItem} />
+                        <View className={cn("flex-1 max-w-[48%]", !isFirstRightColItem ? "mt-10" : "mt-0")}>
+                            <MenuCard item={item} />
                         </View>
-                    )
+                    );
                 }}
-                keyExtractor={item => item.$id}
+                keyExtractor={(item) => item.$id}
                 numColumns={2}
                 columnWrapperClassName="gap-7"
                 contentContainerClassName="gap-7 px-5 pb-32"
@@ -58,13 +72,13 @@ const Search = () => {
 
                         <SearchBar />
 
-                        <Filter categories={categories!} />
+                        {categories && <Filter categories={categories} />}
                     </View>
                 )}
                 ListEmptyComponent={() => !loading && <Text>No results</Text>}
             />
         </SafeAreaView>
-    )
-}
+    );
+};
 
-export default Search
+export default Search;
