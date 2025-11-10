@@ -1,30 +1,32 @@
-import {Redirect, Slot, Tabs} from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import useAuthStore from "@/store/auth.store";
-import {TabBarIconProps} from "@/type";
-import {Image, Text, View} from "react-native";
-import {images} from "@/constants";
+import { TabBarIconProps } from "@/type";
+import { Image, Text, View } from "react-native";
+import { images } from "@/constants";
 import cn from "clsx";
 
 const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
-    <View className="tab-icon">
-        <Image source={icon} className="size-7" resizeMode="contain" tintColor={focused ? '#FE8C00' : '#5D5F6D'} />
-        <Text className={cn('text-sm font-bold', focused ? 'text-primary':'text-gray-200')}>
-            {title}
-        </Text>
+    <View style={{ alignItems: 'center' }}>
+        <Image
+            source={icon}
+            style={{ width: 40, height: 40, tintColor: focused ? 'gray' : 'gray' }}
+        />
+        <Text style={{ color: focused ? 'gray' : 'gray', fontSize: 12 }}>{title}</Text>
     </View>
-)
+);
+
 
 export default function TabLayout() {
     const { isAuthenticated } = useAuthStore();
 
-// ---- TEMP DEV BYPASS: set to `true` to skip auth checks ----
+    // ---- TEMP DEV BYPASS: set to `true` to skip auth checks ----
     const DEV_BYPASS_AUTH = true;
 
-    if (!DEV_BYPASS_AUTH && !isAuthenticated) return <Redirect href="/sign-in" />
-
+    if (!DEV_BYPASS_AUTH && !isAuthenticated) return <Redirect href="/sign-in" />;
 
     return (
-        <Tabs screenOptions={{
+        <Tabs
+            screenOptions={{
                 headerShown: false,
                 tabBarShowLabel: false,
                 tabBarStyle: {
@@ -41,9 +43,13 @@ export default function TabLayout() {
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.1,
                     shadowRadius: 4,
-                    elevation: 5
+                    elevation: 5,
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    alignItems: 'center'
                 }
-            }}>
+            }}
+        >
             <Tabs.Screen
                 name='index'
                 options={{
@@ -58,6 +64,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ focused }) => <TabBarIcon title="Search" icon={images.search} focused={focused} />
                 }}
             />
+
             <Tabs.Screen
                 name='cart'
                 options={{
@@ -70,6 +77,13 @@ export default function TabLayout() {
                 options={{
                     title: 'Profile',
                     tabBarIcon: ({ focused }) => <TabBarIcon title="Profile" icon={images.person} focused={focused} />
+                }}
+            />
+            <Tabs.Screen
+                name='map'
+                options={{
+                    title: 'Map',
+                    tabBarIcon: ({ focused }) => <TabBarIcon title="Map" icon={images.map} focused={focused} />
                 }}
             />
         </Tabs>
