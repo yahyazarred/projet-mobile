@@ -68,6 +68,27 @@ export const getCurrentUser = async () => {
         throw e;
     }
 };
+export const logout = async () => {
+    try {
+        await account.deleteSession("current");
+    } catch (e) {
+        console.error("Logout error:", e);
+        throw e;
+    }
+};
+export const updateUser = async (userId: string, data: any) => {
+    try {
+        return await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+            userId,
+            data
+        );
+    } catch (e) {
+        console.error("Update user error:", e);
+        throw e;
+    }
+};
 
 // ================= FIXED getMenu =================
 export const getMenu = async ({
