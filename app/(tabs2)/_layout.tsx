@@ -1,11 +1,16 @@
-import { Redirect, Tabs } from "expo-router";
-import useAuthStore from "@/store/auth.store";
-import { TabBarIconProps } from "@/type";
-import { Image, Text, View } from "react-native";
+import { Tabs } from "expo-router";
+import { Image, Text, View, ImageSourcePropType } from "react-native";
 import { images } from "@/constants";
 
 const ACTIVE_COLOR = "#df5a0c";
 const INACTIVE_COLOR = "#999";
+
+// Reuse the TabBarIcon with proper styling
+interface TabBarIconProps {
+    focused: boolean;
+    icon: ImageSourcePropType;
+    title: string;
+}
 
 const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
     <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -30,12 +35,7 @@ const TabBarIcon = ({ focused, icon, title }: TabBarIconProps) => (
     </View>
 );
 
-export default function TabLayout() {
-    const { isAuthenticated } = useAuthStore();
-    const DEV_BYPASS_AUTH = true;
-
-    if (!DEV_BYPASS_AUTH && !isAuthenticated) return <Redirect href="/sign-in" />;
-
+export default function OwnerTabLayout() {
     return (
         <Tabs
             screenOptions={{
@@ -56,17 +56,15 @@ export default function TabLayout() {
                     elevation: 8,
                     flexDirection: "row",
                     justifyContent: "space-around",
-                    alignItems: "center", // icons centered vertically
-                    paddingHorizontal: 0, // remove extra padding
+                    alignItems: "center",
+                    paddingHorizontal: 0,
                 },
             }}
         >
             {[
-                { name: "index", title: "Home", icon: images.home },
-                { name: "search", title: "Search", icon: images.search },
-                { name: "cart", title: "Cart", icon: images.bag },
-                { name: "profile", title: "Profile", icon: images.person },
-                { name: "map", title: "Map", icon: images.map },
+                { name: "restaurant-profile", title: "Profile", icon: images.person },
+                { name: "menu", title: "Menu", icon: images.bag },
+                { name: "orders", title: "Orders", icon: images.home },
             ].map((tab) => (
                 <Tabs.Screen
                     key={tab.name}
@@ -75,10 +73,10 @@ export default function TabLayout() {
                         tabBarIcon: ({ focused }) => (
                             <View
                                 style={{
-                                    flex: 1, // makes the whole section clickable
+                                    flex: 1,
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    height: "100%", // stretch to full tab height
+                                    height: "100%",
                                 }}
                             >
                                 <TabBarIcon title={tab.title} icon={tab.icon} focused={focused} />
