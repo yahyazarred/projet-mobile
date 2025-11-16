@@ -28,7 +28,7 @@ const OwnerSignUp = () => {
         try {
             await logout().catch(() => null);
 
-            // 1️⃣ Create a user with role = restaurant_owner
+            // Create a user with role = restaurant_owner
             await createUser({
                 email,
                 password,
@@ -36,11 +36,11 @@ const OwnerSignUp = () => {
                 role: "restaurant_owner",
             });
 
-            // 2️⃣ Fetch the user profile to get accountId
+            // Fetch the user profile to get accountId
             const user = await getCurrentUser();
             if (!user) throw new Error("User creation failed");
 
-            // 3️⃣ Create the restaurant and link to user
+            // Create the restaurant and link to user
             await createRestaurant({
                 ownerId: user.accountId,
                 name: restaurantName,
@@ -48,7 +48,7 @@ const OwnerSignUp = () => {
             });
 
             Alert.alert("Success", "Restaurant created!");
-            router.replace("..//(tabs2)/restaurant-profile");
+            router.replace("../(tabs2)/restaurant-profile");
 
         } catch (error: any) {
             console.error("OwnerSignUp error:", error);
@@ -59,54 +59,80 @@ const OwnerSignUp = () => {
     };
 
     return (
-        <View className="gap-5 bg-white rounded-lg p-5 mt-5">
+        <View className="bg-amber-50 rounded-lg p-5 mt-5">
 
-            <CustomInput
-                label="Email"
-                placeholder="Enter your email"
-                value={form.email}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
-            />
+            {/* Email */}
+            <View className="mb-4">
+                <CustomInput
+                    label="Email"
+                    placeholder="Enter your email"
+                    value={form.email}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
+                    style={{ backgroundColor: 'transparent' }}
+                />
+            </View>
 
-            <CustomInput
-                label="Password"
-                placeholder="Enter password"
-                secureTextEntry
-                value={form.password}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
-            />
+            {/* Password */}
+            <View className="mb-4">
+                <CustomInput
+                    label="Password"
+                    placeholder="Enter password"
+                    secureTextEntry
+                    value={form.password}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
+                    style={{ backgroundColor: 'transparent' }}
+                />
+            </View>
 
-            <CustomInput
-                label="Owner Name"
-                placeholder="Enter owner's full name"
-                value={form.ownerName}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, ownerName: text }))}
-            />
+            {/* Owner Name */}
+            <View className="mb-4">
+                <CustomInput
+                    label="Owner Name"
+                    placeholder="Enter owner's full name"
+                    value={form.ownerName}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, ownerName: text }))}
+                    style={{ backgroundColor: 'transparent' }}
+                />
+            </View>
 
-            <CustomInput
-                label="Restaurant Name"
-                placeholder="Enter your restaurant name"
-                value={form.restaurantName}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, restaurantName: text }))}
-            />
+            {/* Restaurant Name */}
+            <View className="mb-4">
+                <CustomInput
+                    label="Restaurant Name"
+                    placeholder="Enter your restaurant name"
+                    value={form.restaurantName}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, restaurantName: text }))}
+                    style={{ backgroundColor: 'transparent' }}
+                />
+            </View>
 
-            <CustomInput
-                label="Description"
-                placeholder="Describe your restaurant"
-                multiline
-                value={form.description}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, description: text }))}
-            />
+            {/* Description */}
+            <View className="mb-4">
+                <CustomInput
+                    label="Description"
+                    placeholder="Describe your restaurant"
+                    multiline
+                    value={form.description}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, description: text }))}
+                    style={{ backgroundColor: 'transparent' }}
+                />
+            </View>
 
+            {/* Submit button */}
             <CustomButton
                 title="Submit"
                 isLoading={isSubmitting}
                 onPress={submit}
+                style="bg-red-700"
             />
 
-            <View className="flex justify-center mt-5 flex-row gap-2">
-                <Text className="base-regular text-gray-100">Go back?</Text>
-                <Link href="../(signup-choice)/sign-up-choice.tsx" className="base-bold text-primary">
+            {/* Go back / Return */}
+            <View className="items-center mt-6">
+                <Text className="text-gray-700 text-base">already have an account?</Text>
+                <Link
+                    href="../(signup-choice)/sign-up-choice"
+                    className="text-red-700 font-semibold mt-1"
+                >
                     Return
                 </Link>
             </View>

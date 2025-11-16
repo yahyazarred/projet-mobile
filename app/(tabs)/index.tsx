@@ -63,7 +63,7 @@ export default function Index() {
             id: '2',
             title: 'Free Delivery',
             subtitle: 'Orders above $20',
-            color: '#10B981',
+            color: '#B91C1C',
             image: require('@/assets/images/lunch.png'),
         },
     ];

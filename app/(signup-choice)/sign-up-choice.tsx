@@ -26,7 +26,7 @@ const SignUpTypeSelector = () => {
             name: "Delivery Driver",
             description: "Deliver orders & earn",
             icon: "bicycle" as const,
-            gradient: "bg-amber-700",
+            gradient: "bg-red-700",
             route: "/sign-up-driver" as const,
         },
     ];
@@ -35,12 +35,12 @@ const SignUpTypeSelector = () => {
         <SafeAreaView className="flex-1 bg-amber-50">
             <View className="flex-1 px-5 py-8">
                 {/* Header */}
-                <View className="items-center mb-10">
-                    <View className="bg-amber-600 w-20 h-20 rounded-full items-center justify-center mb-4">
+                <View className="items-center mt-16 mb-10">
+                    <View className="bg-red-700 w-20 h-20 rounded-full items-center justify-center mb-4">
                         <Ionicons name="restaurant" size={40} color="white" />
                     </View>
                     <Text className="text-3xl font-bold text-gray-900 mb-2">
-                        Join Us Today
+                        Join Us
                     </Text>
                     <Text className="text-base text-gray-600 text-center">
                         Choose how you want to get started
@@ -83,7 +83,7 @@ const SignUpTypeSelector = () => {
                         onPress={() => router.push("/sign-in")}
                         className="mt-2"
                     >
-                        <Text className="text-amber-600 font-semibold text-base">
+                        <Text className="text-red-700 font-semibold text-base">
                             Sign In
                         </Text>
                     </TouchableOpacity>

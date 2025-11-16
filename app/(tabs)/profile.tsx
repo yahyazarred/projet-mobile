@@ -77,7 +77,7 @@ const Profile = () => {
                     <View className="flex-row justify-between items-center mb-8">
                         <Text className="text-2xl font-bold text-white">My Profile</Text>
                         <TouchableOpacity className="bg-white/20 p-2 rounded-full">
-                            <Ionicons name="notifications-outline" size={24} color="#fff" />
+                            <Ionicons name="notifications-outline" size={24} color="#ffff" />
                         </TouchableOpacity>
                     </View>
 
@@ -104,24 +104,24 @@ const Profile = () => {
                     {/* User Stats */}
                     <View className="bg-white rounded-2xl p-4 shadow-sm mb-6 flex-row justify-around">
                         <View className="items-center">
-                            <Text className="text-2xl font-bold text-amber-600">24</Text>
+                            <Text className="text-2xl font-bold text-black">24</Text>
                             <Text className="text-xs text-gray-600 mt-1">Orders</Text>
                         </View>
-                        <View className="w-px bg-amber-100" />
+                        <View className="w-px bg-red-700" />
                         <View className="items-center">
-                            <Text className="text-2xl font-bold text-amber-600">12</Text>
+                            <Text className="text-2xl font-bold text-black">12</Text>
                             <Text className="text-xs text-gray-600 mt-1">Favorites</Text>
                         </View>
-                        <View className="w-px bg-amber-100" />
+                        <View className="w-px bg-red-700" />
                         <View className="items-center">
-                            <Text className="text-2xl font-bold text-amber-600">8</Text>
+                            <Text className="text-2xl font-bold text-black">8</Text>
                             <Text className="text-xs text-gray-600 mt-1">Reviews</Text>
                         </View>
                     </View>
 
                     {/* Profile Information */}
-                    <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
-                        <Text className="text-lg font-bold text-gray-900 mb-4">
+                    <View className="bg-white rounded-2xl p-5 shadow-md mb-6">
+                        <Text className="text-lg font-bold text-black mb-4">
                             Profile Information
                         </Text>
 
@@ -129,8 +129,8 @@ const Profile = () => {
                         <View className="mb-4">
                             <Text className="text-xs text-gray-600 mb-2">Full Name</Text>
                             {isEditing ? (
-                                <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-200">
-                                    <Ionicons name="person-outline" size={20} color="#D97706" />
+                                <View className="flex-row items-center bg-amber-100 rounded-xl px-4 py-3 border border-amber-500">
+                                    <Ionicons name="person-outline" size={20} color="#B91C1C" />
                                     <TextInput
                                         className="flex-1 ml-3 text-gray-900 text-base"
                                         value={form.name}
@@ -140,7 +140,7 @@ const Profile = () => {
                                     />
                                 </View>
                             ) : (
-                                <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3">
+                                <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-500">
                                     <Ionicons name="person-outline" size={20} color="#D97706" />
                                     <Text className="ml-3 text-gray-900 text-base font-medium">
                                         {user.name}
@@ -152,8 +152,8 @@ const Profile = () => {
                         {/* Email Field */}
                         <View className="mb-4">
                             <Text className="text-xs text-gray-600 mb-2">Email Address</Text>
-                            <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3">
-                                <Ionicons name="mail-outline" size={20} color="#D97706" />
+                            <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-orange-500">
+                                <Ionicons name="mail-outline" size={20} color="#B91C1C" />
                                 <Text className="ml-3 text-gray-900 text-base font-medium">
                                     {user.email}
                                 </Text>
@@ -161,13 +161,14 @@ const Profile = () => {
                         </View>
 
                         {/* Role Badge */}
-                        <View className="flex-row items-center bg-amber-100 rounded-xl px-4 py-3">
-                            <Ionicons name="shield-checkmark" size={20} color="#D97706" />
-                            <Text className="ml-3 text-amber-800 text-base font-medium capitalize">
+                        <View className="flex-row items-center bg-red-700 rounded-xl px-4 py-3">
+                            <Ionicons name="shield-checkmark" size={20} color="white" />
+                            <Text className="ml-3 text-white text-base font-medium capitalize">
                                 {user.role || "Customer"}
                             </Text>
                         </View>
                     </View>
+
 
                     {/* Action Buttons */}
                     <View className="space-y-3">
@@ -207,7 +208,7 @@ const Profile = () => {
                         ) : (
                             <>
                                 <TouchableOpacity
-                                    className="bg-amber-600 rounded-xl p-4 shadow-sm mb-3"
+                                    className="bg-orange-600 rounded-xl p-4 shadow-sm mb-3"
                                     onPress={() => setIsEditing(true)}
                                     activeOpacity={0.8}
                                 >
@@ -219,7 +220,7 @@ const Profile = () => {
                                     </View>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    className="bg-red-500 rounded-xl p-4 shadow-sm"
+                                    className="bg-amber-500 rounded-xl p-4 shadow-sm"
                                     onPress={async () => {
                                         await logout();
                                         router.replace("../(auth)/sign-in");
@@ -244,7 +245,7 @@ const Profile = () => {
                             activeOpacity={0.7}
                         >
                             <View className="bg-amber-50 p-2 rounded-full">
-                                <Ionicons name="heart-outline" size={20} color="#D97706" />
+                                <Ionicons name="heart-outline" size={20} color="#B91C1C" />
                             </View>
                             <Text className="flex-1 ml-3 text-gray-900 font-medium">
                                 My Favorites
