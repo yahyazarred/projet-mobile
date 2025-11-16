@@ -3,7 +3,8 @@ import { Link, router } from "expo-router";
 import CustomInput from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import { useState } from "react";
-import { signIn, logout } from "@/lib/appwrite";
+import { signIn, logout, getCurrentUser } from "@/lib/appwrite";
+
 
 const SignIn = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,14 +20,24 @@ const SignIn = () => {
         setIsSubmitting(true);
 
         try {
-            // Clear any existing session to prevent conflicts
+            // Clear existing session
             await logout().catch(() => null);
 
-            // Create a new session
+            // Sign in
             await signIn({ email, password });
 
-            // Redirect to home
-            router.replace("/");
+            // Get user info to check role
+            const user = await getCurrentUser();
+
+            if (!user) throw new Error("User not found");
+
+            // Redirect based on role
+            if (user.role === "restaurant_owner") {
+                router.replace("../(tabs2)/restaurant-profile");
+            } else {
+                router.replace("/"); // same as before
+            }
+
         } catch (error: any) {
             Alert.alert("Error", error.message);
             console.error("SignIn error:", error);
@@ -55,8 +66,10 @@ const SignIn = () => {
             <CustomButton title="Sign In" isLoading={isSubmitting} onPress={submit} />
 
             <View className="flex justify-center mt-5 flex-row gap-2">
-                <Text className="base-regular text-gray-100">Don't have an account?</Text>
-                <Link href="/sign-up" className="base-bold text-primary">
+                <Text className="base-regular text-gray-100">
+                    Don't have an account?
+                </Text>
+                <Link href="../(signup-choice)/sign-up-choice" className="base-bold text-primary">
                     Sign Up
                 </Link>
             </View>
