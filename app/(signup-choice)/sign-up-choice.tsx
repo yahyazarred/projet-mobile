@@ -1,88 +1,96 @@
 export const unstable_noLayout = true;
 
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { FontAwesome5, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SignUpTypeSelector = () => {
     const types = [
         {
             name: "Customer",
-            icon: <FontAwesome5 name="user" size={32} color="#fff" />,
-            route: "/sign-up",
+            description: "Order delicious food",
+            icon: "person" as const,
+            gradient: "bg-amber-500",
+            route: "/sign-up" as const,
         },
         {
             name: "Restaurant Owner",
-            icon: <MaterialCommunityIcons name="silverware-fork-knife" size={32} color="#fff" />,
-            route: "/owner-sign-in",
+            description: "Manage your restaurant",
+            icon: "restaurant" as const,
+            gradient: "bg-orange-600",
+            route: "/owner-sign-in" as const,
         },
         {
             name: "Delivery Driver",
-            icon: <Entypo name="truck" size={32} color="#fff" />,
-            route: "/sign-up-driver",
+            description: "Deliver orders & earn",
+            icon: "bicycle" as const,
+            gradient: "bg-amber-700",
+            route: "/sign-up-driver" as const,
         },
     ];
 
     return (
-        <View style={styles.container}>
-            {types.map((type, index) => {
-                const isEven = index % 2 === 0;
-                return (
+        <SafeAreaView className="flex-1 bg-amber-50">
+            <View className="flex-1 px-5 py-8">
+                {/* Header */}
+                <View className="items-center mb-10">
+                    <View className="bg-amber-600 w-20 h-20 rounded-full items-center justify-center mb-4">
+                        <Ionicons name="restaurant" size={40} color="white" />
+                    </View>
+                    <Text className="text-3xl font-bold text-gray-900 mb-2">
+                        Join Us Today
+                    </Text>
+                    <Text className="text-base text-gray-600 text-center">
+                        Choose how you want to get started
+                    </Text>
+                </View>
+
+                {/* Options */}
+                <View className="flex-1 justify-center gap-4">
+                    {types.map((type, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            className={`${type.gradient} rounded-3xl p-6 shadow-lg`}
+                            onPress={() => router.push(type.route)}
+                            activeOpacity={0.8}
+                        >
+                            <View className="flex-row items-center">
+                                <View className="bg-white/20 w-16 h-16 rounded-2xl items-center justify-center mr-4">
+                                    <Ionicons name={type.icon} size={32} color="white" />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className="text-white text-xl font-bold mb-1">
+                                        {type.name}
+                                    </Text>
+                                    <Text className="text-white/80 text-sm">
+                                        {type.description}
+                                    </Text>
+                                </View>
+                                <Ionicons name="chevron-forward" size={24} color="white" />
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                {/* Footer */}
+                <View className="items-center mt-6">
+                    <Text className="text-gray-600 text-sm">
+                        Already have an account?
+                    </Text>
                     <TouchableOpacity
-                        key={index}
-                        style={[
-                            styles.section,
-                            { flexDirection: isEven ? "row-reverse" : "row" },
-                        ]}
-                        onPress={() => router.push(type.route)}
+                        onPress={() => router.push("/sign-in")}
+                        className="mt-2"
                     >
-                        <View style={styles.iconContainer}>{type.icon}</View>
-                        <View style={styles.textContainer}>
-                            <Text style={styles.sectionText}>{type.name}</Text>
-                        </View>
+                        <Text className="text-amber-600 font-semibold text-base">
+                            Sign In
+                        </Text>
                     </TouchableOpacity>
-                );
-            })}
-        </View>
+                </View>
+            </View>
+        </SafeAreaView>
     );
 };
 
 export default SignUpTypeSelector;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#DF5A0C", // main background color
-        justifyContent: "space-around", // evenly space the 3 sections vertically
-        paddingHorizontal: 20,
-        paddingVertical: 40,
-    },
-    section: {
-        flex: 1,
-        borderRadius: 20,
-        backgroundColor: "rgba(255,255,255,0.15)", // slightly transparent overlay
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-        marginVertical: 10,
-    },
-    iconContainer: {
-        width: 60,
-        height: 60,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    textContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    sectionText: {
-        color: "#fff",
-        fontSize: 24,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginHorizontal: 10,
-    },
-});

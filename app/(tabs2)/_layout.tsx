@@ -62,9 +62,10 @@ export default function OwnerTabLayout() {
             }}
         >
             {[
-                { name: "restaurant-profile", title: "Profile", icon: images.person },
                 { name: "menu", title: "Menu", icon: images.bag },
                 { name: "orders", title: "Orders", icon: images.home },
+                { name: "restaurant-profile", title: "Profile", icon: images.person },
+
             ].map((tab) => (
                 <Tabs.Screen
                     key={tab.name}

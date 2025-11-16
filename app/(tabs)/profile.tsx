@@ -6,7 +6,6 @@ import {
     ScrollView,
     ActivityIndicator,
     TextInput,
-    ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,7 +36,6 @@ const Profile = () => {
         if (!user) return;
 
         try {
-            // Update only the name
             if (form.name !== user.name) {
                 await account.updateName(form.name);
                 await updateUser(user.$id, { name: form.name });
@@ -55,7 +53,7 @@ const Profile = () => {
     if (loading) {
         return (
             <SafeAreaView className="flex-1 justify-center items-center bg-white">
-                <ActivityIndicator size="large" color="#f97316" />
+                <ActivityIndicator size="large" color="#D4A574" />
             </SafeAreaView>
         );
     }
@@ -69,119 +67,219 @@ const Profile = () => {
     }
 
     return (
-        <SafeAreaView className="flex-1">
-            <ImageBackground
-                source={require("@/assets/profile-bg.jpg")}
+        <SafeAreaView className="flex-1 bg-amber-50">
+            <ScrollView
+                showsVerticalScrollIndicator={false}
                 className="flex-1"
-                resizeMode="cover"
             >
-                <ScrollView
-                    contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 30 }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* Header */}
-                    <View className="flex-row justify-between items-center mb-5">
-                        <Text className="text-2xl font-bold text-white">Profile</Text>
-                        <Ionicons name="search-outline" size={22} color="#fff" />
+                {/* Header with mustard gradient */}
+                <View className="bg-amber-600 pb-20 pt-4 px-5 rounded-b-[30px]">
+                    <View className="flex-row justify-between items-center mb-8">
+                        <Text className="text-2xl font-bold text-white">My Profile</Text>
+                        <TouchableOpacity className="bg-white/20 p-2 rounded-full">
+                            <Ionicons name="notifications-outline" size={24} color="#fff" />
+                        </TouchableOpacity>
                     </View>
 
                     {/* Profile Picture */}
-                    <View className="items-center mb-6">
-                        <Image
-                            source={{ uri: user.avatar }}
-                            className="w-28 h-28 rounded-full border-2 border-yellow-600"
-                            resizeMode="cover"
-                        />
+                    <View className="items-center -mb-16">
+                        <View className="relative">
+                            <Image
+                                source={{ uri: user.avatar }}
+                                className="w-32 h-32 rounded-full border-4 border-white"
+                                resizeMode="cover"
+                            />
+                            <TouchableOpacity
+                                className="absolute bottom-0 right-0 bg-amber-600 p-2 rounded-full border-4 border-white"
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons name="camera" size={20} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Content */}
+                <View className="px-5 pt-20 pb-8">
+                    {/* User Stats */}
+                    <View className="bg-white rounded-2xl p-4 shadow-sm mb-6 flex-row justify-around">
+                        <View className="items-center">
+                            <Text className="text-2xl font-bold text-amber-600">24</Text>
+                            <Text className="text-xs text-gray-600 mt-1">Orders</Text>
+                        </View>
+                        <View className="w-px bg-amber-100" />
+                        <View className="items-center">
+                            <Text className="text-2xl font-bold text-amber-600">12</Text>
+                            <Text className="text-xs text-gray-600 mt-1">Favorites</Text>
+                        </View>
+                        <View className="w-px bg-amber-100" />
+                        <View className="items-center">
+                            <Text className="text-2xl font-bold text-amber-600">8</Text>
+                            <Text className="text-xs text-gray-600 mt-1">Reviews</Text>
+                        </View>
                     </View>
 
-                    {/* Profile Form */}
-                    <ImageBackground
-                        source={require("@/assets/form.jpg")}
-                        className="rounded-2xl p-5 shadow-sm overflow-hidden"
-                        resizeMode="cover"
-                        imageStyle={{ opacity: 0.5 }}
-                    >
-                        {/* Name */}
+                    {/* Profile Information */}
+                    <View className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+                        <Text className="text-lg font-bold text-gray-900 mb-4">
+                            Profile Information
+                        </Text>
+
+                        {/* Name Field */}
                         <View className="mb-4">
-                            <Text className="text-white text-sm">Full Name</Text>
+                            <Text className="text-xs text-gray-600 mb-2">Full Name</Text>
                             {isEditing ? (
-                                <TextInput
-                                    className="text-gray-800 text-base font-semibold border-b border-gray-300"
-                                    value={form.name}
-                                    onChangeText={(text) => setForm({ ...form, name: text })}
-                                />
+                                <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-200">
+                                    <Ionicons name="person-outline" size={20} color="#D97706" />
+                                    <TextInput
+                                        className="flex-1 ml-3 text-gray-900 text-base"
+                                        value={form.name}
+                                        onChangeText={(text) => setForm({ ...form, name: text })}
+                                        placeholder="Enter your name"
+                                        placeholderTextColor="#9CA3AF"
+                                    />
+                                </View>
                             ) : (
-                                <Text className="text-gray-800 text-base font-semibold">{user.name}</Text>
+                                <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3">
+                                    <Ionicons name="person-outline" size={20} color="#D97706" />
+                                    <Text className="ml-3 text-gray-900 text-base font-medium">
+                                        {user.name}
+                                    </Text>
+                                </View>
                             )}
                         </View>
 
-                        {/* Email (read-only) */}
+                        {/* Email Field */}
                         <View className="mb-4">
-                            <Text className="text-white text-sm">Email</Text>
-                            <Text className="text-gray-800 text-base font-semibold">{user.email}</Text>
+                            <Text className="text-xs text-gray-600 mb-2">Email Address</Text>
+                            <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3">
+                                <Ionicons name="mail-outline" size={20} color="#D97706" />
+                                <Text className="ml-3 text-gray-900 text-base font-medium">
+                                    {user.email}
+                                </Text>
+                            </View>
                         </View>
 
-                        {/* Buttons */}
-                        <View className="mt-8 space-y-3">
-                            {isEditing ? (
-                                <ImageBackground
-                                    source={require("@/assets/save.jpg")}
-                                    resizeMode="cover"
-                                    imageStyle={{ borderRadius: 16, opacity: 0.8 }}
-                                    className="rounded-2xl overflow-hidden mb-3"
+                        {/* Role Badge */}
+                        <View className="flex-row items-center bg-amber-100 rounded-xl px-4 py-3">
+                            <Ionicons name="shield-checkmark" size={20} color="#D97706" />
+                            <Text className="ml-3 text-amber-800 text-base font-medium capitalize">
+                                {user.role || "Customer"}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Action Buttons */}
+                    <View className="space-y-3">
+                        {isEditing ? (
+                            <>
+                                <TouchableOpacity
+                                    className="bg-amber-600 rounded-xl p-4 shadow-sm mb-3"
+                                    onPress={saveChanges}
+                                    activeOpacity={0.8}
                                 >
-                                    <TouchableOpacity
-                                        className="py-3 rounded-2xl"
-                                        onPress={saveChanges}
-                                        activeOpacity={0.8}
-                                    >
-                                        <Text className="text-white text-center font-semibold text-base">
+                                    <View className="flex-row items-center justify-center">
+                                        <Ionicons name="checkmark-circle" size={22} color="white" />
+                                        <Text className="text-white text-center font-semibold text-base ml-2">
                                             Save Changes
                                         </Text>
-                                    </TouchableOpacity>
-                                </ImageBackground>
-                            ) : (
-                                <ImageBackground
-                                    source={require("@/assets/save.jpg")}
-                                    resizeMode="cover"
-                                    imageStyle={{ borderRadius: 16, opacity: 0.8 }}
-                                    className="rounded-2xl overflow-hidden mb-3"
+                                    </View>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    className="bg-gray-200 rounded-xl p-4"
+                                    onPress={() => {
+                                        setIsEditing(false);
+                                        setForm({
+                                            name: user.name || "",
+                                            email: user.email || "",
+                                        });
+                                    }}
+                                    activeOpacity={0.8}
                                 >
-                                    <TouchableOpacity
-                                        className="py-3 rounded-2xl"
-                                        onPress={() => setIsEditing(true)}
-                                        activeOpacity={0.8}
-                                    >
-                                        <Text className="text-white text-center font-semibold text-base">
+                                    <View className="flex-row items-center justify-center">
+                                        <Ionicons name="close-circle" size={22} color="#6B7280" />
+                                        <Text className="text-gray-700 text-center font-semibold text-base ml-2">
+                                            Cancel
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            <>
+                                <TouchableOpacity
+                                    className="bg-amber-600 rounded-xl p-4 shadow-sm mb-3"
+                                    onPress={() => setIsEditing(true)}
+                                    activeOpacity={0.8}
+                                >
+                                    <View className="flex-row items-center justify-center">
+                                        <Ionicons name="create-outline" size={22} color="white" />
+                                        <Text className="text-white text-center font-semibold text-base ml-2">
                                             Edit Profile
                                         </Text>
-                                    </TouchableOpacity>
-                                </ImageBackground>
-                            )}
-
-                            <ImageBackground
-                                source={require("@/assets/logout.jpg")}
-                                resizeMode="cover"
-                                imageStyle={{ borderRadius: 16, opacity: 0.8 }}
-                                className="rounded-2xl overflow-hidden mb-3"
-                            >
+                                    </View>
+                                </TouchableOpacity>
                                 <TouchableOpacity
-                                    className="py-3 rounded-2xl"
+                                    className="bg-red-500 rounded-xl p-4 shadow-sm"
                                     onPress={async () => {
                                         await logout();
                                         router.replace("../(auth)/sign-in");
                                     }}
                                     activeOpacity={0.8}
                                 >
-                                    <Text className="text-white text-center font-semibold text-base">
-                                        Logout
-                                    </Text>
+                                    <View className="flex-row items-center justify-center">
+                                        <Ionicons name="log-out-outline" size={22} color="white" />
+                                        <Text className="text-white text-center font-semibold text-base ml-2">
+                                            Logout
+                                        </Text>
+                                    </View>
                                 </TouchableOpacity>
-                            </ImageBackground>
-                        </View>
-                    </ImageBackground>
-                </ScrollView>
-            </ImageBackground>
+                            </>
+                        )}
+                    </View>
+
+                    {/* Quick Actions */}
+                    <View className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
+                        <TouchableOpacity
+                            className="flex-row items-center p-4 border-b border-amber-100"
+                            activeOpacity={0.7}
+                        >
+                            <View className="bg-amber-50 p-2 rounded-full">
+                                <Ionicons name="heart-outline" size={20} color="#D97706" />
+                            </View>
+                            <Text className="flex-1 ml-3 text-gray-900 font-medium">
+                                My Favorites
+                            </Text>
+                            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-row items-center p-4 border-b border-amber-100"
+                            activeOpacity={0.7}
+                        >
+                            <View className="bg-amber-50 p-2 rounded-full">
+                                <Ionicons name="receipt-outline" size={20} color="#D97706" />
+                            </View>
+                            <Text className="flex-1 ml-3 text-gray-900 font-medium">
+                                Order History
+                            </Text>
+                            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-row items-center p-4"
+                            activeOpacity={0.7}
+                        >
+                            <View className="bg-amber-50 p-2 rounded-full">
+                                <Ionicons name="settings-outline" size={20} color="#D97706" />
+                            </View>
+                            <Text className="flex-1 ml-3 text-gray-900 font-medium">
+                                Settings
+                            </Text>
+                            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };
