@@ -5,13 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="25556cee-f7b2-4b2a-867e-358e6ab1b6f9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/components/MenuFormModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/MenuItemCard.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/install/23expoImgPicker.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/imageService.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/menuService.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/menuTypes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/orderService.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/useMenuItems.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/map.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/map.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/profile.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs2)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs2)/restaurant-profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/restaurant-profile.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metro.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/metro.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/cart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/cart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/search.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs2)/menu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/menu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs2)/orders.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/orders.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/MenuCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MenuCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/appwrite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/appwrite.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/cart.store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store/cart.store.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,7 +141,8 @@
       <workItem from="1763202162618" duration="1857000" />
       <workItem from="1763204054113" duration="899000" />
       <workItem from="1763280959328" duration="3319000" />
-      <workItem from="1763294554576" duration="6298000" />
+      <workItem from="1763294554576" duration="7129000" />
+      <workItem from="1763406281105" duration="8711000" />
     </task>
     <servers />
   </component>

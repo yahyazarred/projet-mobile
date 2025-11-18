@@ -1,193 +1,227 @@
-import { useEffect, useState } from "react";
+// app/(tabs2)/menu.tsx
+import { useState } from "react";
+import { View, Text, FlatList, Pressable, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, Pressable, Image, Text, View, Modal, TextInput, Alert } from "react-native";
-import cn from "clsx";
+import { Ionicons } from "@expo/vector-icons";
+import { useMenuItems } from "@/lib/useMenuItems";
+import { pickImage, uploadImage } from "@/lib/imageService";
+import { createMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/menuService";
+import { MenuItem, MenuFormData } from "@/lib/menuTypes";
+import { MenuItemCard } from "@/components/MenuItemCard";
+import { MenuFormModal } from "@/components/MenuFormModal";
 
-import { appwriteConfig, databases, getCurrentUser } from "@/lib/appwrite";
-import { Query, ID } from "react-native-appwrite"; // 🔥 Import ID here
-import { images } from "@/constants";
+export default function MenuItemsManagement() {
+    const {
+        menuItems,
+        categories,
+        loading,
+        currentRestaurantId,
+        setLoading,
+        loadData,
+    } = useMenuItems();
 
-interface Category {
-    $id: string;
-    name: string;
-    description: string;
-    color?: string;
-    restaurantId?: string;
-}
-
-// Use IDs from appwriteConfig
-const DB_ID = appwriteConfig.databaseId;
-const RESTAURANTS_ID = appwriteConfig.restaurantCollectionId;
-const CATEGORIES_ID = appwriteConfig.categoriesCollectionId;
-
-export default function MenuCategories() {
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
-    const [newCategory, setNewCategory] = useState({ name: "", description: "" });
-    const [currentRestaurantId, setCurrentRestaurantId] = useState<string>("");
+    const [editMode, setEditMode] = useState(false);
+    const [currentItem, setCurrentItem] = useState<MenuItem | null>(null);
 
-    // Fetch restaurant of this owner using accountId
-    const fetchRestaurant = async (accountId: string) => {
-        const result = await databases.listDocuments(DB_ID, RESTAURANTS_ID, [
-            Query.equal("ownerId", accountId)
-        ]);
+    const [formData, setFormData] = useState<MenuFormData>({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        calories: "",
+        protein: "",
+        imageUri: "",
+    });
 
-        return result.documents[0] ?? null;
+    const handlePickImage = async () => {
+        const uri = await pickImage();
+        if (uri) {
+            setFormData((prev) => ({ ...prev, imageUri: uri }));
+        }
     };
 
-    // Fetch categories for this restaurant
-    const fetchCategories = async (restaurantId: string) => {
-        const result = await databases.listDocuments(DB_ID, CATEGORIES_ID, [
-            Query.equal("restaurantId", restaurantId)
-        ]);
-
-        return result.documents as Category[];
+    const handleFormChange = (field: keyof MenuFormData, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const user = await getCurrentUser();
-                if (!user) throw new Error("User not found");
+    const handleSave = async () => {
+        // Validate required fields
+        if (!formData.name || !formData.description || !formData.price) {
+            return Alert.alert("Error", "Please fill in name, description, and price");
+        }
 
-                // 🔥 Use user.accountId here, not user.$id
-                const restaurant = await fetchRestaurant(user.accountId);
-                if (!restaurant) {
-                    throw new Error("No restaurant associated with this owner");
-                }
+        if (!formData.category) {
+            return Alert.alert("Error", "Please select a category. Create a category first if none exist.");
+        }
 
-                setCurrentRestaurantId(restaurant.$id);
-
-                // Load restaurant categories
-                const data = await fetchCategories(restaurant.$id);
-                setCategories(data);
-            } catch (err) {
-                console.log("Failed to load categories:", err);
-                Alert.alert("Error", (err as Error).message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        load();
-    }, []);
-
-    const handleAddCategory = async () => {
-        if (!newCategory.name || !newCategory.description) {
-            return Alert.alert("Error", "Please fill in all fields");
+        if (!formData.imageUri) {
+            return Alert.alert("Error", "Please select an image for the menu item");
         }
 
         try {
-            await databases.createDocument(DB_ID, CATEGORIES_ID, ID.unique(), {
-                name: newCategory.name,
-                description: newCategory.description,
+            setLoading(true);
+
+            let imageUrl = currentItem?.image_url || "";
+
+            // Upload new image if changed
+            if (formData.imageUri && formData.imageUri !== currentItem?.image_url) {
+                console.log("Uploading new image...");
+                imageUrl = await uploadImage(formData.imageUri);
+                console.log("Image uploaded successfully:", imageUrl);
+            }
+
+            const data = {
+                name: formData.name,
+                description: formData.description,
+                price: parseFloat(formData.price),
+                categories: formData.category,
                 restaurantId: currentRestaurantId,
-            });
+                image_url: imageUrl,
+                calories: formData.calories ? parseInt(formData.calories) : 0,
+                protein: formData.protein ? parseInt(formData.protein) : 0,
+                rating: currentItem?.rating || 3,
+            };
 
-            Alert.alert("Success", "Category created!");
-            setModalVisible(false);
-            setNewCategory({ name: "", description: "" });
+            console.log("Saving menu item:", data);
 
-            // Reload categories
-            const data = await fetchCategories(currentRestaurantId);
-            setCategories(data);
+            if (editMode && currentItem) {
+                await updateMenuItem(currentItem.$id, data);
+            } else {
+                await createMenuItem(data);
+            }
+
+            closeModal();
+            await loadData();
         } catch (err) {
-            console.error(err);
-            Alert.alert("Error", (err as Error).message);
+            console.error("Save error:", err);
+            Alert.alert("Error", `Failed to save: ${(err as Error).message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) {
+    const handleDelete = async (itemId: string, imageUrl: string) => {
+        try {
+            setLoading(true);
+            await deleteMenuItem(itemId, imageUrl);
+            await loadData();
+        } catch (err) {
+            // Error already handled in deleteMenuItem
+            if ((err as Error).message !== "Cancelled") {
+                console.error("Delete error:", err);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const openAddModal = () => {
+        if (categories.length === 0) {
+            return Alert.alert(
+                "No Categories",
+                "Please create at least one category before adding menu items. Would you like to go to the categories page?",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "OK", onPress: () => console.log("Navigate to categories") }
+                ]
+            );
+        }
+
+        setEditMode(false);
+        setCurrentItem(null);
+        setFormData({
+            name: "",
+            description: "",
+            price: "",
+            category: categories[0]?.$id || "",
+            calories: "",
+            protein: "",
+            imageUri: "",
+        });
+        setModalVisible(true);
+    };
+
+    const openEditModal = (item: MenuItem) => {
+        setEditMode(true);
+        setCurrentItem(item);
+        setFormData({
+            name: item.name,
+            description: item.description,
+            price: item.price.toString(),
+            category: item.categories,
+            calories: item.calories?.toString() || "",
+            protein: item.protein?.toString() || "",
+            imageUri: item.image_url,
+        });
+        setModalVisible(true);
+    };
+
+    const closeModal = () => {
+        setModalVisible(false);
+        setEditMode(false);
+        setCurrentItem(null);
+    };
+
+    if (loading && menuItems.length === 0) {
         return (
-            <SafeAreaView className="flex-1 items-center justify-center bg-white">
-                <Text className="text-lg text-gray-600">Loading categories…</Text>
+            <SafeAreaView className="flex-1 justify-center items-center bg-white">
+                <ActivityIndicator size="large" color="#df5a0c" />
+                <Text className="mt-3 text-gray-600">Loading menu...</Text>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-gray-50">
             <FlatList
-                data={categories}
+                data={menuItems}
                 keyExtractor={(item) => item.$id}
-                contentContainerClassName="pb-40 px-5"
-                ListHeaderComponent={() => (
-                    <View className="flex-row justify-between w-full my-5 items-center">
+                contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
+                ListHeaderComponent={
+                    <View className="flex-row justify-between items-center my-5">
                         <View>
-                            <Text className="small-bold text-primary">MENU</Text>
-                            <Text className="paragraph-bold text-dark-100 mt-0.5">
-                                Browse Categories
+                            <Text className="text-xs font-semibold text-primary">MENU ITEMS</Text>
+                            <Text className="text-2xl font-bold text-gray-900 mt-1">
+                                Manage Your Menu
                             </Text>
                         </View>
-
                         <Pressable
-                            onPress={() => setModalVisible(true)}
-                            className="bg-primary w-12 h-12 rounded-full items-center justify-center"
+                            onPress={openAddModal}
+                            className="bg-primary w-14 h-14 rounded-full items-center justify-center shadow-lg"
                         >
-                            <Text className="text-white text-2xl">+</Text>
+                            <Ionicons name="add" size={28} color="white" />
                         </Pressable>
                     </View>
+                }
+                ListEmptyComponent={
+                    <View className="items-center justify-center py-20">
+                        <Ionicons name="fast-food-outline" size={64} color="#ccc" />
+                        <Text className="text-gray-500 mt-4">No menu items yet</Text>
+                        <Text className="text-gray-400 text-sm">Add your first item!</Text>
+                    </View>
+                }
+                renderItem={({ item }) => (
+                    <MenuItemCard
+                        item={item}
+                        categories={categories}
+                        onEdit={openEditModal}
+                        onDelete={handleDelete}
+                    />
                 )}
-                renderItem={({ item, index }) => {
-                    const isEven = index % 2 === 0;
-                    return (
-                        <View className="my-3">
-                            <Pressable
-                                onPress={() => console.log("Category clicked:", item.name)}
-                                className={cn("offer-card", isEven ? "flex-row-reverse" : "flex-row")}
-                                style={{ backgroundColor: item.color || "#df5a0c" }}
-                            >
-                                <View className="h-full w-1/2 flex items-center justify-center">
-                                    <Image
-                                        source={images.burgerTwo}
-                                        className="w-full h-full"
-                                        resizeMode="contain"
-                                    />
-                                </View>
-
-                                <View className={cn("offer-card__info", isEven ? "pl-10" : "pr-10")}>
-                                    <Text className="h1-bold text-white leading-tight">{item.name}</Text>
-                                    <Text className="text-white mt-1 opacity-80">{item.description}</Text>
-                                </View>
-                            </Pressable>
-                        </View>
-                    );
-                }}
             />
 
-            {/* Modal */}
-            <Modal visible={modalVisible} transparent animationType="slide">
-                <View className="flex-1 justify-center items-center bg-black/50">
-                    <View className="bg-white w-4/5 p-5 rounded-lg">
-                        <Text className="text-lg font-bold mb-3">New Category</Text>
-
-                        <TextInput
-                            placeholder="Category Name"
-                            value={newCategory.name}
-                            onChangeText={(text) => setNewCategory((prev) => ({ ...prev, name: text }))}
-                            className="border border-gray-300 p-3 rounded mb-3"
-                        />
-                        <TextInput
-                            placeholder="Category Description"
-                            value={newCategory.description}
-                            onChangeText={(text) =>
-                                setNewCategory((prev) => ({ ...prev, description: text }))
-                            }
-                            className="border border-gray-300 p-3 rounded mb-3"
-                        />
-
-                        <View className="flex-row justify-end gap-3 mt-3">
-                            <Pressable onPress={() => setModalVisible(false)}>
-                                <Text className="text-gray-500">Cancel</Text>
-                            </Pressable>
-                            <Pressable onPress={handleAddCategory}>
-                                <Text className="text-primary font-bold">Create</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+            <MenuFormModal
+                visible={modalVisible}
+                editMode={editMode}
+                formData={formData}
+                categories={categories}
+                loading={loading}
+                onClose={closeModal}
+                onSave={handleSave}
+                onPickImage={handlePickImage}
+                onFormChange={handleFormChange}
+            />
         </SafeAreaView>
     );
 }

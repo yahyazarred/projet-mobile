@@ -1,13 +1,17 @@
-import {View, Text, FlatList} from 'react-native'
-import {SafeAreaView} from "react-native-safe-area-context";
-import {useCartStore} from "@/store/cart.store";
+import { View, Text, FlatList, Alert, TextInput, Modal, Pressable, ScrollView } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import { useCartStore } from "@/store/cart.store";
 import CustomHeader from "@/components/CustomHeader";
 import cn from "clsx";
 import CustomButton from "@/components/CustomButton";
 import CartItem from "@/components/CartItem";
-import {PaymentInfoStripeProps} from "@/type";
+import { PaymentInfoStripeProps } from "@/type";
+import { createOrder, OrderItem } from "@/lib/orderService";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
-const PaymentInfoStripe = ({ label,  value,  labelStyle,  valueStyle, }: PaymentInfoStripeProps) => (
+const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfoStripeProps) => (
     <View className="flex-between flex-row my-1">
         <Text className={cn("paragraph-medium text-gray-200", labelStyle)}>
             {label}
@@ -19,10 +23,86 @@ const PaymentInfoStripe = ({ label,  value,  labelStyle,  valueStyle, }: Payment
 );
 
 const Cart = () => {
-    const { items, getTotalItems, getTotalPrice } = useCartStore();
+    const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore();
+    const [loading, setLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    // Form data for order
+    const [deliveryAddress, setDeliveryAddress] = useState("");
+    const [deliveryInstructions, setDeliveryInstructions] = useState("");
+    const [customerPhone, setCustomerPhone] = useState("");
 
     const totalItems = getTotalItems();
     const totalPrice = getTotalPrice();
+    const deliveryFee = 5.00;
+    const discount = 0.50;
+    const finalTotal = totalPrice + deliveryFee - discount;
+
+    const handleOrderNow = () => {
+        if (items.length === 0) {
+            Alert.alert("Empty Cart", "Please add items to your cart first");
+            return;
+        }
+        setModalVisible(true);
+    };
+
+    const handlePlaceOrder = async () => {
+        // Validate delivery address
+        if (!deliveryAddress.trim()) {
+            Alert.alert("Missing Information", "Please enter your delivery address");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Get restaurant ID from the first item (assuming all items are from same restaurant)
+            const restaurantId = items[0]?.restaurantId;
+            if (!restaurantId) {
+                throw new Error("Restaurant information not found");
+            }
+
+            // Transform cart items to order items
+            const orderItems: OrderItem[] = items.map(item => ({
+                menuItemId: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                customizations: item.customizations,
+            }));
+
+            // Create the order
+            await createOrder({
+                restaurantId,
+                items: orderItems,
+                totalPrice: finalTotal,
+                deliveryAddress,
+                deliveryInstructions,
+                customerPhone,
+            });
+
+            // Clear the cart after successful order
+            clearCart();
+            setModalVisible(false);
+
+            // Show success message
+            Alert.alert(
+                "Order Placed!",
+                "Your order has been successfully placed. The restaurant will confirm it shortly.",
+                [
+                    {
+                        text: "OK",
+                        onPress: () => router.push("//(tabs)/search"),
+                    },
+                ]
+            );
+        } catch (error) {
+            console.error("Place order error:", error);
+            Alert.alert("Order Failed", (error as Error).message || "Failed to place order. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView className="bg-white h-full">
@@ -32,7 +112,13 @@ const Cart = () => {
                 keyExtractor={(item) => item.id}
                 contentContainerClassName="pb-28 px-5 pt-5"
                 ListHeaderComponent={() => <CustomHeader title="Your Cart" />}
-                ListEmptyComponent={() => <Text>Cart Empty</Text>}
+                ListEmptyComponent={() => (
+                    <View className="items-center justify-center py-20">
+                        <Ionicons name="cart-outline" size={64} color="#ccc" />
+                        <Text className="text-gray-500 mt-4 text-lg">Your cart is empty</Text>
+                        <Text className="text-gray-400 text-sm">Add some delicious items!</Text>
+                    </View>
+                )}
                 ListFooterComponent={() => totalItems > 0 && (
                     <View className="gap-5">
                         <View className="mt-6 border border-gray-200 p-5 rounded-2xl">
@@ -45,29 +131,123 @@ const Cart = () => {
                                 value={`$${totalPrice.toFixed(2)}`}
                             />
                             <PaymentInfoStripe
-                                label={`Delivery Fee`}
-                                value={`$5.00`}
+                                label="Delivery Fee"
+                                value={`$${deliveryFee.toFixed(2)}`}
                             />
                             <PaymentInfoStripe
-                                label={`Discount`}
-                                value={`- $0.50`}
+                                label="Discount"
+                                value={`- $${discount.toFixed(2)}`}
                                 valueStyle="!text-success"
                             />
                             <View className="border-t border-gray-300 my-2" />
                             <PaymentInfoStripe
-                                label={`Total`}
-                                value={`$${(totalPrice + 5 - 0.5).toFixed(2)}`}
+                                label="Total"
+                                value={`$${finalTotal.toFixed(2)}`}
                                 labelStyle="base-bold !text-dark-100"
                                 valueStyle="base-bold !text-dark-100 !text-right"
                             />
                         </View>
 
-                        <CustomButton title="Order Now" />
+                        <CustomButton
+                            title="Order Now"
+                            onPress={handleOrderNow}
+                        />
                     </View>
                 )}
             />
+
+            {/* Order Details Modal */}
+            <Modal visible={modalVisible} animationType="slide" transparent>
+                <View className="flex-1 bg-black/50 justify-end">
+                    <View className="bg-white rounded-t-3xl max-h-[80%]">
+                        <View className="flex-row justify-between items-center p-5 border-b border-gray-100">
+                            <Text className="text-xl font-bold text-gray-900">Delivery Details</Text>
+                            <Pressable onPress={() => setModalVisible(false)}>
+                                <Ionicons name="close" size={28} color="#666" />
+                            </Pressable>
+                        </View>
+
+                        <ScrollView className="p-5">
+                            <View className="gap-4">
+                                <View>
+                                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                                        Phone Number *
+                                    </Text>
+                                    <TextInput
+                                        placeholder="Enter your phone number"
+                                        value={customerPhone}
+                                        onChangeText={setCustomerPhone}
+                                        keyboardType="phone-pad"
+                                        className="border border-gray-300 rounded-xl p-4 text-base"
+                                    />
+                                </View>
+
+                                <View>
+                                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                                        Delivery Address *
+                                    </Text>
+                                    <TextInput
+                                        placeholder="Enter your full delivery address"
+                                        value={deliveryAddress}
+                                        onChangeText={setDeliveryAddress}
+                                        multiline
+                                        numberOfLines={3}
+                                        textAlignVertical="top"
+                                        className="border border-gray-300 rounded-xl p-4 text-base h-24"
+                                    />
+                                </View>
+
+                                <View>
+                                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                                        Delivery Instructions (Optional)
+                                    </Text>
+                                    <TextInput
+                                        placeholder="E.g., Ring the doorbell, Leave at door..."
+                                        value={deliveryInstructions}
+                                        onChangeText={setDeliveryInstructions}
+                                        multiline
+                                        numberOfLines={2}
+                                        textAlignVertical="top"
+                                        className="border border-gray-300 rounded-xl p-4 text-base h-20"
+                                    />
+                                </View>
+
+                                {/* Order Summary */}
+                                <View className="bg-gray-50 rounded-xl p-4 mt-2">
+                                    <Text className="text-sm font-bold text-gray-900 mb-2">Order Summary</Text>
+                                    <View className="flex-row justify-between mb-1">
+                                        <Text className="text-sm text-gray-600">Subtotal</Text>
+                                        <Text className="text-sm font-semibold">${totalPrice.toFixed(2)}</Text>
+                                    </View>
+                                    <View className="flex-row justify-between mb-1">
+                                        <Text className="text-sm text-gray-600">Delivery Fee</Text>
+                                        <Text className="text-sm font-semibold">${deliveryFee.toFixed(2)}</Text>
+                                    </View>
+                                    <View className="flex-row justify-between mb-2">
+                                        <Text className="text-sm text-gray-600">Discount</Text>
+                                        <Text className="text-sm font-semibold text-green-600">-${discount.toFixed(2)}</Text>
+                                    </View>
+                                    <View className="border-t border-gray-300 pt-2">
+                                        <View className="flex-row justify-between">
+                                            <Text className="text-base font-bold text-gray-900">Total</Text>
+                                            <Text className="text-base font-bold text-primary">${finalTotal.toFixed(2)}</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        </ScrollView>
+
+                        <View className="p-5 border-t border-gray-100">
+                            <CustomButton
+                                title={loading ? "Placing Order..." : "Place Order"}
+                                onPress={handlePlaceOrder}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
-    )
+    );
 }
 
-export default Cart
+export default Cart;

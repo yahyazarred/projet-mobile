@@ -13,7 +13,7 @@ export const appwriteConfig = {
     customizationsCollectionId: "690f26a50011cee4d4e7",
     menuCustomizationsCollectionId: "690f28e9003ad689bf3a",
     restaurantCollectionId: "69199bdd000a4f0767ee",
-
+    ordersCollectionId: "691b75f50037cf051770",
 };
 
 const client = new Client();
@@ -191,5 +191,57 @@ export const getCategories = async () => {
         return categories.documents;
     } catch (e) {
         throw new Error(e as string);
+    }
+};
+// ---------------- GET RESTAURANT BY OWNER ----------------
+export const getRestaurantByOwner = async (ownerId: string) => {
+    try {
+        const result = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.restaurantCollectionId,
+            [Query.equal("ownerId", ownerId)]
+        );
+        return result.documents[0] || null;
+    } catch (e) {
+        console.error("Get restaurant error:", e);
+        throw e;
+    }
+};
+
+// ---------------- UPDATE ORDER STATUS ----------------
+export const updateOrderStatus = async (
+    orderId: string,
+    status: string,
+    additionalData?: any
+) => {
+    try {
+        return await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.ordersCollectionId,
+            orderId,
+            { status, ...additionalData }
+        );
+    } catch (e) {
+        console.error("Update order status error:", e);
+        throw e;
+    }
+};
+
+// ---------------- GET RESTAURANT ORDERS ----------------
+export const getRestaurantOrders = async (restaurantId: string) => {
+    try {
+        const result = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.ordersCollectionId,
+            [
+                Query.equal("restaurantId", restaurantId),
+                Query.orderDesc("placedAt"),
+                Query.limit(100)
+            ]
+        );
+        return result.documents;
+    } catch (e) {
+        console.error("Get restaurant orders error:", e);
+        throw e;
     }
 };

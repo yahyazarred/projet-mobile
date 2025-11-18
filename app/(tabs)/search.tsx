@@ -7,7 +7,7 @@ import {useEffect} from "react";
 import CartButton from "@/components/CartButton";
 import cn from "clsx";
 import MenuCard from "@/components/MenuCard";
-import {MenuItem} from "@/type";
+import {MenuItem, Category} from "@/type";  // ← Ajoute Category à l'import
 
 import Filter from "@/components/Filter";
 import SearchBar from "@/components/SearchBar";
@@ -15,7 +15,7 @@ import SearchBar from "@/components/SearchBar";
 const Search = () => {
     const { category, query } = useLocalSearchParams<{query: string; category: string}>()
 
-    const { data, refetch, loading } = useAppwrite({ fn: getMenu, params: { category,  query,  limit: 6, } });
+    const { data, refetch, loading } = useAppwrite({ fn: getMenu, params: { category, query, limit: 6 } });
     const { data: categories } = useAppwrite({ fn: getCategories });
 
     useEffect(() => {
@@ -24,7 +24,6 @@ const Search = () => {
         console.log("Query:", query);
         console.log("Fetched menu:", data);
     }, [category, query]);
-
 
     return (
         <SafeAreaView className="bg-white h-full">
@@ -35,7 +34,9 @@ const Search = () => {
 
                     return (
                         <View className={cn("flex-1 max-w-[48%]", !isFirstRightColItem ? 'mt-10': 'mt-0')}>
-                            <MenuCard item={item as MenuItem} />
+                            <MenuCard item={item as MenuItem}
+                                      restaurantId={item.restaurantId || "unknown"}
+                            />
                         </View>
                     )
                 }}
@@ -58,7 +59,8 @@ const Search = () => {
 
                         <SearchBar />
 
-                        <Filter categories={categories!} />
+                        <Filter categories={(categories as Category[]) || []} />
+                        {/* ← Cast en Category[] avec fallback vers tableau vide */}
                     </View>
                 )}
                 ListEmptyComponent={() => !loading && <Text>No results</Text>}
