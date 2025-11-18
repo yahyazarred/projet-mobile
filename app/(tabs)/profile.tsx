@@ -13,11 +13,14 @@ import useAppwrite from "@/lib/useAppwrite";
 import { getCurrentUser, updateUser, logout, account } from "@/lib/appwrite";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
+import useAuthStore from "@/store/auth.store"; // ADD THIS LINE
 
 const Profile = () => {
     const { data: user, loading, refetch } = useAppwrite({ fn: getCurrentUser });
+    const { setIsAuthenticated, setUser: setAuthUser } = useAuthStore(); // ADD THIS LINE
 
     const [isEditing, setIsEditing] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -47,6 +50,33 @@ const Profile = () => {
         } catch (error: any) {
             console.error("Update error:", error);
             alert("Failed to update profile.");
+        }
+    };
+
+    // REPLACE ONLY THIS FUNCTION
+    const handleLogout = async () => {
+        try {
+            console.log("🔴 Starting customer logout...");
+            setLoggingOut(true);
+
+            console.log("🔴 Clearing auth store...");
+            setIsAuthenticated(false);
+            setAuthUser(null);
+
+            console.log("🔴 Logging out from Appwrite...");
+            await logout();
+
+            console.log("🔴 Logout successful, redirecting...");
+            router.replace("/(auth)/sign-in");
+
+            console.log("✅ Customer logout complete!");
+        } catch (error: any) {
+            console.error("❌ Customer logout error:", error);
+            setIsAuthenticated(false);
+            setAuthUser(null);
+            router.replace("/(auth)/sign-in");
+        } finally {
+            setLoggingOut(false);
         }
     };
 
@@ -221,17 +251,16 @@ const Profile = () => {
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     className="bg-amber-500 rounded-xl p-4 shadow-sm"
-                                    onPress={async () => {
-                                        await logout();
-                                        router.replace("../(auth)/sign-in");
-                                    }}
+                                    onPress={handleLogout}
+                                    disabled={loggingOut}
                                     activeOpacity={0.8}
                                 >
                                     <View className="flex-row items-center justify-center">
                                         <Ionicons name="log-out-outline" size={22} color="white" />
                                         <Text className="text-white text-center font-semibold text-base ml-2">
-                                            Logout
+                                            {loggingOut ? "Logging out..." : "Logout"}
                                         </Text>
+                                        {loggingOut && <ActivityIndicator color="white" size="small" style={{ marginLeft: 8 }} />}
                                     </View>
                                 </TouchableOpacity>
                             </>
