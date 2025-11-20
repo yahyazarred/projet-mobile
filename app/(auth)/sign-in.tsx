@@ -25,10 +25,13 @@ const SignIn = () => {
             const user = await getCurrentUser();
             if (!user) throw new Error("User not found");
 
+            // ---------------- ROLE-BASED NAVIGATION ----------------
             if (user.role === "restaurant_owner") {
-                router.replace("../(tabs2)/restaurant-profile");
+                router.replace("../(tabs2)/restaurant-profile"); // unchanged
+            } else if (user.role === "driver") {
+                router.replace("../(tabs3)/driver-profile"); // <-- placeholder, replace with your driver home screen path
             } else {
-                router.replace("/");
+                router.replace("/"); // customer path unchanged
             }
 
         } catch (error: any) {

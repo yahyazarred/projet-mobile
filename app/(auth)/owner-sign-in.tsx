@@ -48,7 +48,7 @@ const OwnerSignUp = () => {
             });
 
             Alert.alert("Success", "Restaurant created!");
-            router.replace("../(tabs2)/restaurant-profile");
+            router.replace("/sign-in");
 
         } catch (error: any) {
             console.error("OwnerSignUp error:", error);
