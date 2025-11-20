@@ -1,5 +1,5 @@
-import { Account, Avatars, Client, Databases, ID, Query, Storage } from "react-native-appwrite";
-import { Category, GetMenuParams, MenuItem, SignInParams } from "@/type";
+import {Account, Avatars, Client, Databases, ID, Models, Query, Storage} from "react-native-appwrite";
+import {Category, GetMenuParams, MenuItem, SignInParams} from "@/type";
 
 export const appwriteConfig = {
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!,
@@ -16,11 +16,8 @@ export const appwriteConfig = {
     ordersCollectionId: "691b75f50037cf051770",
 };
 
-// ---------------- CLIENT ----------------
-const client = new Client()
-    .setEndpoint(appwriteConfig.endpoint)
-    .setProject(appwriteConfig.projectId)
-    .setPlatform(appwriteConfig.platform);
+const client = new Client();
+client.setEndpoint(appwriteConfig.endpoint).setProject(appwriteConfig.projectId).setPlatform(appwriteConfig.platform);
 
 export const account = new Account(client);
 export const databases = new Databases(client);
@@ -28,42 +25,26 @@ export const storage = new Storage(client);
 export const avatars = new Avatars(client);
 
 // ---------------- CREATE USER ----------------
-export const createUser = async ({
-                                     email,
-                                     password,
-                                     name,
-                                     role = "customer",
-                                     phone,
-                                     vehicleType,
-                                     licensePlate
-                                 }: any) => {
+export const createUser = async ({ email, password, name, role = "customer" }: any) => {
     try {
         const newAccount = await account.create(ID.unique(), email, password, name);
         if (!newAccount) throw new Error("Account creation failed");
 
-        // Immediately sign in
         await signIn({ email, password });
 
         const avatarUrl = avatars.getInitialsURL(name);
-        const userData: any = {
-            email,
-            name,
-            role,
-            accountId: newAccount.$id,
-            avatar: avatarUrl
-        };
-
-        if (role === "driver") {
-            userData.phone = phone;
-            userData.vehicleType = vehicleType;
-            userData.licensePlate = licensePlate;
-        }
 
         return await databases.createDocument(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
             ID.unique(),
-            userData
+            {
+                email,
+                name,
+                role,
+                accountId: newAccount.$id,
+                avatar: avatarUrl,
+            }
         );
     } catch (e) {
         console.error("Create user error:", e);
@@ -71,19 +52,66 @@ export const createUser = async ({
     }
 };
 
+// ---------------- CREATE RESTAURANT ----------------
+export const createRestaurant = async ({
+                                           ownerId,
+                                           name,
+                                           description,
+                                       }: {
+    ownerId: string;
+    name: string;
+    description: string;
+}) => {
+    try {
+        return await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.restaurantCollectionId, // MUST be the correct ID
+            ID.unique(),
+            {
+                ownerId,
+                name,
+                description,
+            }
+        );
+    } catch (e) {
+        console.error("Create restaurant error:", e);
+        throw e;
+    }
+};
+
+// ---------------- CREATE CATEGORY ----------------
+export const createCategory = async ({
+                                         name,
+                                         description,
+                                         restaurantId,
+                                     }: {
+    name: string;
+    description: string;
+    restaurantId: string;
+}) => {
+    try {
+        return await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.categoriesCollectionId,
+            ID.unique(),
+            {
+                name,
+                description,
+                restaurantId,
+            }
+        );
+    } catch (e) {
+        console.error("Create category error:", e);
+        throw e;
+    }
+};
+
 // ---------------- SIGN IN ----------------
 export const signIn = async ({ email, password }: SignInParams) => {
     try {
-        await account.createEmailPasswordSession(email, password);
-        const currentAccount = await account.get();
-        const currentUser = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.userCollectionId,
-            [Query.equal("accountId", currentAccount.$id)]
-        );
-        return currentUser.documents[0] || null;
-    } catch (e: any) {
-        console.error("Sign-in error:", e.message || e);
+        return await account.createEmailPasswordSession(email, password);
+    } catch (e) {
+        console.error("Sign-in error:", e);
         throw e;
     }
 };
@@ -92,15 +120,18 @@ export const signIn = async ({ email, password }: SignInParams) => {
 export const getCurrentUser = async () => {
     try {
         const currentAccount = await account.get();
+        if (!currentAccount) throw new Error("No account found");
+
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
             [Query.equal("accountId", currentAccount.$id)]
         );
-        return currentUser.documents[0] || null;
-    } catch (e: any) {
-        console.log("No active session or guest:", e.message);
-        return null;
+
+        return currentUser.documents[0];
+    } catch (e) {
+        console.error("Get current user error:", e);
+        throw e;
     }
 };
 
@@ -108,9 +139,9 @@ export const getCurrentUser = async () => {
 export const logout = async () => {
     try {
         await account.deleteSession("current");
-        console.log("✅ Session deleted successfully");
-    } catch (e: any) {
-        console.log("✅ No active session to delete");
+    } catch (e) {
+        console.error("Logout error:", e);
+        throw e;
     }
 };
 
@@ -132,14 +163,17 @@ export const updateUser = async (userId: string, data: any) => {
 // ---------------- GET MENU ----------------
 export const getMenu = async ({ category, query }: GetMenuParams) => {
     try {
-        const queries: any[] = [];
+        const queries: string[] = [];
+
         if (category) queries.push(Query.equal("categories", category));
         if (query) queries.push(Query.search("name", query));
+
         const menus = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.menuCollectionId,
             queries
         );
+
         return menus.documents;
     } catch (e) {
         throw new Error(e as string);
@@ -153,6 +187,7 @@ export const getCategories = async () => {
             appwriteConfig.databaseId,
             appwriteConfig.categoriesCollectionId
         );
+
         return categories.documents;
     } catch (e) {
         throw new Error(e as string);
@@ -207,127 +242,6 @@ export const getRestaurantOrders = async (restaurantId: string) => {
         return result.documents;
     } catch (e) {
         console.error("Get restaurant orders error:", e);
-        throw e;
-    }
-};
-
-
-// ---------------- GET AVAILABLE DELIVERIES ----------------
-// Get orders that are ready for pickup (status: "ready")
-export const getAvailableDeliveries = async () => {
-    try {
-        const result = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.ordersCollectionId,
-            [
-                Query.equal("status", "ready"),
-                Query.orderDesc("placedAt"),
-                Query.limit(50)
-            ]
-        );
-        return result.documents;
-    } catch (e) {
-        console.error("Get available deliveries error:", e);
-        throw e;
-    }
-};
-
-// ---------------- GET DRIVER DELIVERIES ----------------
-// Get orders assigned to a specific driver
-export const getDriverDeliveries = async (driverId: string) => {
-    try {
-        const result = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.ordersCollectionId,
-            [
-                Query.equal("driverId", driverId),
-                Query.notEqual("status", "delivered"),
-                Query.orderDesc("placedAt"),
-                Query.limit(50)
-            ]
-        );
-        return result.documents;
-    } catch (e) {
-        console.error("Get driver deliveries error:", e);
-        throw e;
-    }
-};
-
-// ---------------- GET DRIVER DELIVERY HISTORY ----------------
-export const getDriverDeliveryHistory = async (driverId: string) => {
-    try {
-        const result = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.ordersCollectionId,
-            [
-                Query.equal("driverId", driverId),
-                Query.equal("status", "delivered"),
-                Query.orderDesc("deliveredAt"),
-                Query.limit(100)
-            ]
-        );
-        return result.documents;
-    } catch (e) {
-        console.error("Get driver history error:", e);
-        throw e;
-    }
-};
-
-// ---------------- ASSIGN DRIVER TO ORDER ----------------
-export const assignDriverToOrder = async (orderId: string, driverId: string) => {
-    try {
-        return await databases.updateDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.ordersCollectionId,
-            orderId,
-            {
-                driverId,
-                status: "picked_up",
-                pickedUpAt: new Date().toISOString()
-            }
-        );
-    } catch (e) {
-        console.error("Assign driver error:", e);
-        throw e;
-    }
-};
-
-// ---------------- UPDATE DELIVERY STATUS ----------------
-export const updateDeliveryStatus = async (
-    orderId: string,
-    status: "picked_up" | "on_the_way" | "delivered"
-) => {
-    try {
-        const updateData: any = { status };
-
-        if (status === "delivered") {
-            updateData.deliveredAt = new Date().toISOString();
-        } else if (status === "picked_up") {
-            updateData.pickedUpAt = new Date().toISOString();
-        }
-
-        return await databases.updateDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.ordersCollectionId,
-            orderId,
-            updateData
-        );
-    } catch (e) {
-        console.error("Update delivery status error:", e);
-        throw e;
-    }
-};
-
-// ---------------- GET ORDER DETAILS ----------------
-export const getOrderDetails = async (orderId: string) => {
-    try {
-        return await databases.getDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.ordersCollectionId,
-            orderId
-        );
-    } catch (e) {
-        console.error("Get order details error:", e);
         throw e;
     }
 };
