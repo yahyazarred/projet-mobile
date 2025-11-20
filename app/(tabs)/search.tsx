@@ -7,8 +7,7 @@ import {useEffect} from "react";
 import CartButton from "@/components/CartButton";
 import cn from "clsx";
 import MenuCard from "@/components/MenuCard";
-import {MenuItem, Category} from "@/type";  // ← Ajoute Category à l'import
-
+import {MenuItem, Category} from "@/type";
 import Filter from "@/components/Filter";
 import SearchBar from "@/components/SearchBar";
 
@@ -23,6 +22,21 @@ const Search = () => {
         console.log("Category:", category);
         console.log("Query:", query);
         console.log("Fetched menu:", data);
+
+        // ⚠️ DEBUG: Check if restaurantId is present in menu items
+        if (data && data.length > 0) {
+            console.log("🔍 First menu item structure:", {
+                id: data[0].$id,
+                name: data[0].name,
+                restaurantId: data[0].restaurantId, // ⚠️ Check this value!
+                price: data[0].price
+            });
+
+            if (!data[0].restaurantId) {
+                console.error("❌ CRITICAL: Menu items missing restaurantId field!");
+                console.error("❌ Your menu_items collection needs a restaurantId attribute");
+            }
+        }
     }, [category, query]);
 
     return (
@@ -32,10 +46,22 @@ const Search = () => {
                 renderItem={({ item, index }) => {
                     const isFirstRightColItem = index % 2 === 0;
 
+                    // ⚠️ CRITICAL: Validate restaurantId
+                    const restaurantId = item.restaurantId;
+
+                    if (!restaurantId || restaurantId === "unknown") {
+                        console.error("❌ Menu item missing valid restaurantId:", {
+                            itemId: item.$id,
+                            itemName: item.name,
+                            restaurantId: restaurantId
+                        });
+                    }
+
                     return (
                         <View className={cn("flex-1 max-w-[48%]", !isFirstRightColItem ? 'mt-10': 'mt-0')}>
-                            <MenuCard item={item as MenuItem}
-                                      restaurantId={item.restaurantId || "unknown"}
+                            <MenuCard
+                                item={item as MenuItem}
+                                restaurantId={restaurantId || "unknown"} // This will show error in logs if missing
                             />
                         </View>
                     )
@@ -60,7 +86,6 @@ const Search = () => {
                         <SearchBar />
 
                         <Filter categories={(categories as Category[]) || []} />
-                        {/* ← Cast en Category[] avec fallback vers tableau vide */}
                     </View>
                 )}
                 ListEmptyComponent={() => !loading && <Text>No results</Text>}

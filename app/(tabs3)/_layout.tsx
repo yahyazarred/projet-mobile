@@ -2,10 +2,9 @@ import { Tabs } from "expo-router";
 import { Image, Text, View, ImageSourcePropType } from "react-native";
 import { images } from "@/constants";
 
-const ACTIVE_COLOR = "#df5a0c";
+const ACTIVE_COLOR = "#3B82F6"; // Blue color for driver
 const INACTIVE_COLOR = "#999";
 
-// Tab bar icon component
 interface TabBarIconProps {
     focused: boolean;
     icon: ImageSourcePropType;
@@ -62,9 +61,9 @@ export default function DriverTabLayout() {
             }}
         >
             {[
+                { name: "deliveries", title: "Deliveries", icon: images.home }, // or use a delivery icon if available
+                { name: "history", title: "History", icon: images.bag },
                 { name: "driver-profile", title: "Profile", icon: images.person },
-                { name: "driver-history", title: "History", icon: images.person },
-                { name: "driver-deliveries", title: "Deliveries", icon: images.person },
             ].map((tab) => (
                 <Tabs.Screen
                     key={tab.name}

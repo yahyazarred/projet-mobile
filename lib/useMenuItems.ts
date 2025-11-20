@@ -64,8 +64,10 @@ export const useMenuItems = () => {
     };
 
     useEffect(() => {
+        console.log("🟢 useMenuItems mounted, loading data...");
         loadData();
     }, []);
+
 
     return {
         menuItems,

@@ -57,14 +57,14 @@ export const MenuFormModal = ({
                         <TextInput
                             placeholder="Item Name *"
                             value={formData.name}
-                            onChangeText={(text) => onFormChange('name', text)}
+                            onChangeText={(text) => onFormChange("name", text)}
                             className="border border-gray-300 rounded-xl p-4 mb-3 text-base"
                         />
 
                         <TextInput
                             placeholder="Description *"
                             value={formData.description}
-                            onChangeText={(text) => onFormChange('description', text)}
+                            onChangeText={(text) => onFormChange("description", text)}
                             className="border border-gray-300 rounded-xl p-4 mb-3 text-base h-24"
                             multiline
                             textAlignVertical="top"
@@ -73,7 +73,7 @@ export const MenuFormModal = ({
                         <TextInput
                             placeholder="Price *"
                             value={formData.price}
-                            onChangeText={(text) => onFormChange('price', text)}
+                            onChangeText={(text) => onFormChange("price", text)}
                             keyboardType="decimal-pad"
                             className="border border-gray-300 rounded-xl p-4 mb-3 text-base"
                         />
@@ -84,7 +84,7 @@ export const MenuFormModal = ({
                                 {categories.map((cat) => (
                                     <Pressable
                                         key={cat.$id}
-                                        onPress={() => onFormChange('category', cat.$id)}
+                                        onPress={() => onFormChange("category", cat.$id)}
                                         className={`px-4 py-2 rounded-full mr-2 ${
                                             formData.category === cat.$id ? "bg-primary" : "bg-gray-100"
                                         }`}
@@ -105,14 +105,14 @@ export const MenuFormModal = ({
                             <TextInput
                                 placeholder="Calories"
                                 value={formData.calories}
-                                onChangeText={(text) => onFormChange('calories', text)}
+                                onChangeText={(text) => onFormChange("calories", text)}
                                 keyboardType="number-pad"
                                 className="border border-gray-300 rounded-xl p-4 flex-1 text-base"
                             />
                             <TextInput
                                 placeholder="Protein (g)"
                                 value={formData.protein}
-                                onChangeText={(text) => onFormChange('protein', text)}
+                                onChangeText={(text) => onFormChange("protein", text)}
                                 keyboardType="number-pad"
                                 className="border border-gray-300 rounded-xl p-4 flex-1 text-base"
                             />

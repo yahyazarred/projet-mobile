@@ -10,6 +10,7 @@ import { PaymentInfoStripeProps } from "@/type";
 import { createOrder, OrderItem } from "@/lib/orderService";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { getCurrentUser } from "@/lib/appwrite";
 
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfoStripeProps) => (
     <View className="flex-between flex-row my-1">
@@ -56,10 +57,34 @@ const Cart = () => {
         try {
             setLoading(true);
 
+            console.log("🛒 ========== PLACE ORDER STARTED ==========");
+            console.log("🛒 Cart items count:", items.length);
+
+            // Debug: Log all cart items
+            items.forEach((item, index) => {
+                console.log(`🛒 Cart Item ${index + 1}:`, {
+                    id: item.id,
+                    name: item.name,
+                    restaurantId: item.restaurantId,
+                    price: item.price,
+                    quantity: item.quantity
+                });
+            });
+
             // Get restaurant ID from the first item (assuming all items are from same restaurant)
             const restaurantId = items[0]?.restaurantId;
+
+            console.log("🍽️ Restaurant ID from cart:", restaurantId);
+            console.log("🍽️ Full first item:", {
+                id: items[0]?.id,
+                name: items[0]?.name,
+                restaurantId: items[0]?.restaurantId,
+            });
+
             if (!restaurantId) {
-                throw new Error("Restaurant information not found");
+                console.error("❌ Restaurant ID is missing from cart items!");
+                console.error("❌ Cart item structure:", JSON.stringify(items[0], null, 2));
+                throw new Error("Restaurant information not found. Please add items to cart again.");
             }
 
             // Transform cart items to order items
@@ -71,8 +96,13 @@ const Cart = () => {
                 customizations: item.customizations,
             }));
 
+            console.log("📦 Order items prepared:", orderItems.length);
+            console.log("💰 Final total:", finalTotal);
+            console.log("📍 Delivery address:", deliveryAddress.substring(0, 50) + "...");
+            console.log("📞 Customer phone:", customerPhone || "Not provided");
+
             // Create the order
-            await createOrder({
+            const createdOrder = await createOrder({
                 restaurantId,
                 items: orderItems,
                 totalPrice: finalTotal,
@@ -81,6 +111,15 @@ const Cart = () => {
                 customerPhone,
             });
 
+            console.log("✅ Order created successfully!");
+            console.log("📋 Created order details:", {
+                id: createdOrder.$id,
+                orderNumber: createdOrder.orderNumber,
+                status: createdOrder.status,
+                restaurantId: createdOrder.restaurantId
+            });
+            console.log("🛒 ========== PLACE ORDER COMPLETED ==========");
+
             // Clear the cart after successful order
             clearCart();
             setModalVisible(false);
@@ -88,19 +127,57 @@ const Cart = () => {
             // Show success message
             Alert.alert(
                 "Order Placed!",
-                "Your order has been successfully placed. The restaurant will confirm it shortly.",
+                `Order #${createdOrder.orderNumber} has been placed successfully. The restaurant will confirm it shortly.`,
                 [
                     {
                         text: "OK",
-                        onPress: () => router.push("//(tabs)/search"),
+                        onPress: () => router.push("/(tabs)/search"),
                     },
                 ]
             );
         } catch (error) {
-            console.error("Place order error:", error);
-            Alert.alert("Order Failed", (error as Error).message || "Failed to place order. Please try again.");
+            console.error("❌ ========== PLACE ORDER FAILED ==========");
+            console.error("❌ Error:", error);
+            console.error("❌ Error message:", (error as any).message);
+            console.error("❌ Error type:", (error as any).type);
+            console.error("❌ Error code:", (error as any).code);
+            console.error("❌ Full error object:", JSON.stringify(error, null, 2));
+
+            Alert.alert(
+                "Order Failed",
+                (error as Error).message || "Failed to place order. Please try again."
+            );
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Debug function to test connection
+    const handleDebugTest = async () => {
+        try {
+            console.log("🧪 ========== DEBUG TEST STARTED ==========");
+
+            const user = await getCurrentUser();
+            console.log("🧪 Current user:", {
+                id: user.$id,
+                accountId: user.accountId,
+                name: user.name,
+                email: user.email
+            });
+
+            console.log("🧪 Cart items:", items.length);
+            if (items.length > 0) {
+                console.log("🧪 First item restaurant ID:", items[0]?.restaurantId);
+                console.log("🧪 First item full data:", JSON.stringify(items[0], null, 2));
+            } else {
+                console.log("🧪 Cart is empty");
+            }
+
+            console.log("🧪 ========== DEBUG TEST COMPLETED ==========");
+            Alert.alert("Debug Info", "Check console logs for details");
+        } catch (e) {
+            console.error("🧪 TEST ERROR:", e);
+            Alert.alert("Debug Error", (e as Error).message);
         }
     };
 
@@ -147,6 +224,16 @@ const Cart = () => {
                                 valueStyle="base-bold !text-dark-100 !text-right"
                             />
                         </View>
+
+                        {/* DEBUG BUTTON - Remove after testing */}
+                        <Pressable
+                            onPress={handleDebugTest}
+                            className="bg-purple-500 p-4 rounded-xl"
+                        >
+                            <Text className="text-white text-center font-bold">
+                                🧪 Debug Test (Check Console)
+                            </Text>
+                        </Pressable>
 
                         <CustomButton
                             title="Order Now"

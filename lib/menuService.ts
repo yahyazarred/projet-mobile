@@ -1,4 +1,6 @@
 // lib/menuService.ts
+console.log("🔵 MenuItemsManagement mounted");
+
 import { Alert } from "react-native";
 import { ID } from "react-native-appwrite";
 import { appwriteConfig, databases } from "@/lib/appwrite";
@@ -21,20 +23,36 @@ export interface MenuItemData {
 
 export const createMenuItem = async (data: MenuItemData): Promise<void> => {
     try {
-        await databases.createDocument(DB_ID, MENU_ID, ID.unique(), data);
+        console.log("🟩 Sending to Appwrite (createMenuItem):", JSON.stringify(data, null, 2));
+
+        const res = await databases.createDocument(DB_ID, MENU_ID, ID.unique(), data);
+
+        console.log("🟩 Appwrite response:", JSON.stringify(res, null, 2));
+
         Alert.alert("Success", "Item created!");
-    } catch (err) {
-        console.error("Create menu item error:", err);
+    } catch (err: any) {
+        console.log("❌ Create menu item error (RAW):", err);
+        console.log("❌ Create menu item error (DETAILS):", JSON.stringify(err, null, 2));
+
+        Alert.alert("Error", err.message || "Unknown error");
         throw err;
     }
 };
 
+
 export const updateMenuItem = async (itemId: string, data: MenuItemData): Promise<void> => {
     try {
-        await databases.updateDocument(DB_ID, MENU_ID, itemId, data);
+        console.log("🟨 Updating menu item:", itemId);
+        console.log("🟨 Payload:", JSON.stringify(data, null, 2));
+
+        const res = await databases.updateDocument(DB_ID, MENU_ID, itemId, data);
+
+        console.log("🟨 Appwrite update response:", JSON.stringify(res, null, 2));
+
         Alert.alert("Success", "Item updated!");
-    } catch (err) {
-        console.error("Update menu item error:", err);
+    } catch (err: any) {
+        console.log("❌ Update menu item error:", JSON.stringify(err, null, 2));
+        Alert.alert("Error", err.message || "Unknown error");
         throw err;
     }
 };
