@@ -107,12 +107,12 @@ const Profile = () => {
                             <Text className="text-2xl font-bold text-black">24</Text>
                             <Text className="text-xs text-gray-600 mt-1">Orders</Text>
                         </View>
-                        <View className="w-px bg-red-700" />
+                        <View className="w-px bg-amber-500" />
                         <View className="items-center">
                             <Text className="text-2xl font-bold text-black">12</Text>
                             <Text className="text-xs text-gray-600 mt-1">Favorites</Text>
                         </View>
-                        <View className="w-px bg-red-700" />
+                        <View className="w-px bg-amber-500" />
                         <View className="items-center">
                             <Text className="text-2xl font-bold text-black">8</Text>
                             <Text className="text-xs text-gray-600 mt-1">Reviews</Text>
@@ -121,7 +121,7 @@ const Profile = () => {
 
                     {/* Profile Information */}
                     <View className="bg-white rounded-2xl p-5 shadow-md mb-6">
-                        <Text className="text-lg font-bold text-black mb-4">
+                        <Text className="text-lg font-bold text-black mb-4 text-center">
                             Profile Information
                         </Text>
 
@@ -175,7 +175,7 @@ const Profile = () => {
                         {isEditing ? (
                             <>
                                 <TouchableOpacity
-                                    className="bg-amber-600 rounded-xl p-4 shadow-sm mb-3"
+                                    className="bg-orange-600 rounded-xl p-4 shadow-sm mb-3"
                                     onPress={saveChanges}
                                     activeOpacity={0.8}
                                 >
@@ -208,7 +208,7 @@ const Profile = () => {
                         ) : (
                             <>
                                 <TouchableOpacity
-                                    className="bg-orange-600 rounded-xl p-4 shadow-sm mb-3"
+                                    className="bg-amber-500 rounded-xl p-4 shadow-sm mb-3"
                                     onPress={() => setIsEditing(true)}
                                     activeOpacity={0.8}
                                 >

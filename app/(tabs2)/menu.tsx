@@ -173,7 +173,7 @@ export default function MenuItemsManagement() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-amber-50">
             <FlatList
                 data={menuItems}
                 keyExtractor={(item) => item.$id}

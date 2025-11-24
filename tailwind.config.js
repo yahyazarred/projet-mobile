@@ -18,6 +18,12 @@ module.exports = {
         dark: {
           100: "#181C2E",
         },
+          orange: {
+              700: "#ED590F", // Tailwind default hex
+          },
+          yellow: {
+              700: "#F49E0B", // Tailwind default hex
+          },
         error: "#F14141",
         success: "#2F9B65",
       },
