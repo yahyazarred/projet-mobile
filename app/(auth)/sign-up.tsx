@@ -133,7 +133,7 @@ const SignUp = () => {
                         onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
                         label="Email"
                         keyboardType="email-address"
-                    />
+                     />
                 </Animated.View>
 
                 <Animated.View

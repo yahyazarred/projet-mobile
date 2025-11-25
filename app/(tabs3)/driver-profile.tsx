@@ -235,7 +235,7 @@ const DriverProfile = () => {
                 </View>
 
                 {/* Logout Button */}
-                <View className="px-4 pb-8">
+                <View className="px-4 pb-8 mb-5">
                     <TouchableOpacity
                         onPress={handleLogout}
                         className="bg-red-500 rounded-xl p-4 flex-row items-center justify-center shadow-sm"
