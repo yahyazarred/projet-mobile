@@ -13,6 +13,8 @@ import useAppwrite from "@/lib/useAppwrite";
 import { getCurrentUser, updateUser, logout, account } from "@/lib/appwrite";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
+import LottieView from "lottie-react-native";
+
 
 const Profile = () => {
     const { data: user, loading, refetch } = useAppwrite({ fn: getCurrentUser });
@@ -73,51 +75,117 @@ const Profile = () => {
                 className="flex-1"
             >
                 {/* Header with mustard gradient */}
-                <View className="bg-amber-600 pb-20 pt-4 px-5 rounded-b-[30px]">
-                    <View className="flex-row justify-between items-center mb-8">
-                        <Text className="text-2xl font-bold text-white">My Profile</Text>
-                        <TouchableOpacity className="bg-white/20 p-2 rounded-full">
-                            <Ionicons name="notifications-outline" size={24} color="#ffff" />
-                        </TouchableOpacity>
-                    </View>
+                <View className="relative h-56 rounded-b-[30px] overflow-hidden">
 
-                    {/* Profile Picture */}
-                    <View className="items-center -mb-16">
-                        <View className="relative">
-                            <Image
-                                source={{ uri: user.avatar }}
-                                className="w-32 h-32 rounded-full border-4 border-white"
-                                resizeMode="cover"
-                            />
-                            <TouchableOpacity
-                                className="absolute bottom-0 right-0 bg-amber-600 p-2 rounded-full border-4 border-white"
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons name="camera" size={20} color="#fff" />
+                    {/* Lottie Background Animation */}
+                    <LottieView
+                        source={require("@/assets/animations/Fast Food.json")}
+                        autoPlay
+
+                        loop
+                        resizeMode="cover"
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            bottom:0,
+                            left: 0,
+                            right: 0,
+                            width: "100%",
+                            height: "70%",
+                            zIndex: -1,
+                        }}
+                    />
+
+                    {/* Content inside header */}
+                    <View className="pt-4 px-5">
+                        <View className="flex-row justify-between items-center mb-8">
+                            <Text className="text-2xl font-bold text-white">My Profile</Text>
+                            <TouchableOpacity className="bg-white/20 p-2 rounded-full">
+                                <Ionicons name="notifications-outline" size={24} color="#fff" />
                             </TouchableOpacity>
                         </View>
+
+
+                    </View>
+                </View>
+                {/* Floating Profile Picture */}
+                <View className="items-center">
+                    <View
+                        className="relative bg-white rounded-full"
+                        style={{
+                            marginTop: -24,
+                            zIndex: 10,
+                            width: 110,   // same as w-32
+                            height: 110,  // same as h-32
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
+                        {user.avatar ? (
+                            <Image
+                                source={{ uri: user.avatar }}
+                                className="w-full h-full rounded-full border-4 border-white"
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <Text className="text-4xl font-bold text-gray-700">
+                                {user.name?.charAt(0).toUpperCase()}
+                            </Text>
+                        )}
+
+                        <TouchableOpacity
+                            className="absolute bottom-0 right-0 bg-amber-500 p-2 rounded-full border-4 border-white"
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="camera" size={20} color="#fff" />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
+
+
+
+
                 {/* Content */}
-                <View className="px-5 pt-20 pb-8">
+                <View className="px-5 pt-10 pb-8">
                     {/* User Stats */}
                     <View className="bg-white rounded-2xl p-4 shadow-sm mb-6 flex-row justify-around">
                         <View className="items-center">
+                            {/* Lottie Animation */}
+                            <LottieView
+                                source={require('@/assets/animations/Confirming Order.json')}
+                                autoPlay
+                                loop
+                                style={{ width: 50, height: 50 }}
+                            />
                             <Text className="text-2xl font-bold text-black">24</Text>
                             <Text className="text-xs text-gray-600 mt-1">Orders</Text>
                         </View>
                         <View className="w-px bg-amber-500" />
                         <View className="items-center">
+                            <LottieView
+                                source={require('@/assets/animations/like.json')}
+                                speed={0.5} // slower
+                                autoPlay
+                                loop
+                                style={{ width: 50, height: 50 }}
+                            />
                             <Text className="text-2xl font-bold text-black">12</Text>
                             <Text className="text-xs text-gray-600 mt-1">Favorites</Text>
                         </View>
                         <View className="w-px bg-amber-500" />
                         <View className="items-center">
+                            <LottieView
+                                source={require('@/assets/animations/Winner.json')}
+                                autoPlay
+                                loop
+                                style={{ width: 50, height: 50 }}
+                            />
                             <Text className="text-2xl font-bold text-black">8</Text>
                             <Text className="text-xs text-gray-600 mt-1">Reviews</Text>
                         </View>
                     </View>
+
 
                     {/* Profile Information */}
                     <View className="bg-white rounded-2xl p-5 shadow-md mb-6">
@@ -141,7 +209,7 @@ const Profile = () => {
                                 </View>
                             ) : (
                                 <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-500">
-                                    <Ionicons name="person-outline" size={20} color="#D97706" />
+                                    <Ionicons name="person-outline" size={20} color="#F59E0B" />
                                     <Text className="ml-3 text-gray-900 text-base font-medium">
                                         {user.name}
                                     </Text>
@@ -152,8 +220,8 @@ const Profile = () => {
                         {/* Email Field */}
                         <View className="mb-4">
                             <Text className="text-xs text-gray-600 mb-2">Email Address</Text>
-                            <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-orange-500">
-                                <Ionicons name="mail-outline" size={20} color="#B91C1C" />
+                            <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-500">
+                                <Ionicons name="mail-outline" size={20} color="#F59E0B" />
                                 <Text className="ml-3 text-gray-900 text-base font-medium">
                                     {user.email}
                                 </Text>
@@ -175,7 +243,7 @@ const Profile = () => {
                         {isEditing ? (
                             <>
                                 <TouchableOpacity
-                                    className="bg-orange-600 rounded-xl p-4 shadow-sm mb-3"
+                                    className="bg-red-700 rounded-xl p-4 shadow-sm mb-3"
                                     onPress={saveChanges}
                                     activeOpacity={0.8}
                                 >
@@ -198,8 +266,8 @@ const Profile = () => {
                                     activeOpacity={0.8}
                                 >
                                     <View className="flex-row items-center justify-center">
-                                        <Ionicons name="close-circle" size={22} color="#6B7280" />
-                                        <Text className="text-gray-700 text-center font-semibold text-base ml-2">
+                                        <Ionicons name="close-circle" size={22} color="white" />
+                                        <Text className="text-white text-center font-semibold text-base ml-2">
                                             Cancel
                                         </Text>
                                     </View>
@@ -219,21 +287,7 @@ const Profile = () => {
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    className="bg-amber-500 rounded-xl p-4 shadow-sm"
-                                    onPress={async () => {
-                                        await logout();
-                                        router.replace("../(auth)/sign-in");
-                                    }}
-                                    activeOpacity={0.8}
-                                >
-                                    <View className="flex-row items-center justify-center">
-                                        <Ionicons name="log-out-outline" size={22} color="white" />
-                                        <Text className="text-white text-center font-semibold text-base ml-2">
-                                            Logout
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
+
                             </>
                         )}
                     </View>
@@ -245,12 +299,12 @@ const Profile = () => {
                             activeOpacity={0.7}
                         >
                             <View className="bg-amber-50 p-2 rounded-full">
-                                <Ionicons name="heart-outline" size={20} color="#B91C1C" />
+                                <Ionicons name="heart-outline" size={20} color="#F59E0B" />
                             </View>
                             <Text className="flex-1 ml-3 text-gray-900 font-medium">
                                 My Favorites
                             </Text>
-                            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                            <Ionicons name="chevron-forward" size={20} color="#F59E0B" />
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -258,12 +312,12 @@ const Profile = () => {
                             activeOpacity={0.7}
                         >
                             <View className="bg-amber-50 p-2 rounded-full">
-                                <Ionicons name="receipt-outline" size={20} color="#D97706" />
+                                <Ionicons name="receipt-outline" size={20} color="#F59E0B" />
                             </View>
                             <Text className="flex-1 ml-3 text-gray-900 font-medium">
                                 Order History
                             </Text>
-                            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                            <Ionicons name="chevron-forward" size={20} color="#F59E0B" />
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -271,14 +325,29 @@ const Profile = () => {
                             activeOpacity={0.7}
                         >
                             <View className="bg-amber-50 p-2 rounded-full">
-                                <Ionicons name="settings-outline" size={20} color="#D97706" />
+                                <Ionicons name="settings-outline" size={20} color="#F59E0B" />
                             </View>
                             <Text className="flex-1 ml-3 text-gray-900 font-medium">
                                 Settings
                             </Text>
-                            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                            <Ionicons name="chevron-forward" size={20} color="#F59E0B" />
                         </TouchableOpacity>
                     </View>
+                    <TouchableOpacity
+                        className="bg-amber-500 rounded-xl p-4 shadow-sm mt-5 mb-5"
+                        onPress={async () => {
+                            await logout();
+                            router.replace("../(auth)/sign-in");
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <View className="flex-row items-center justify-center">
+                            <Ionicons name="log-out-outline" size={22} color="white" />
+                            <Text className="text-white text-center font-semibold text-base ml-2">
+                                Logout
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </SafeAreaView>
