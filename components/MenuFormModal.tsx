@@ -1,7 +1,20 @@
 // components/MenuFormModal.tsx
-import { View, Text, Modal, Pressable, TextInput, Image, ActivityIndicator, ScrollView } from "react-native";
+import { useState } from "react";
+import {
+    View,
+    Text,
+    Modal,
+    TextInput,
+    Pressable,
+    ScrollView,
+    Image,
+    Alert,
+    ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { Category, MenuFormData } from "@/lib/menuTypes";
+
 
 interface MenuFormModalProps {
     visible: boolean;
@@ -9,10 +22,12 @@ interface MenuFormModalProps {
     formData: MenuFormData;
     categories: Category[];
     loading: boolean;
+    currentRestaurantId: string;
     onClose: () => void;
     onSave: () => void;
     onPickImage: () => void;
     onFormChange: (field: keyof MenuFormData, value: string) => void;
+    onCategoryCreated: () => void;
 }
 
 export const MenuFormModal = ({
@@ -21,121 +36,436 @@ export const MenuFormModal = ({
                                   formData,
                                   categories,
                                   loading,
+                                  currentRestaurantId,
                                   onClose,
                                   onSave,
                                   onPickImage,
                                   onFormChange,
+                                  onCategoryCreated,
                               }: MenuFormModalProps) => {
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState("");
+    const [newCategoryDescription, setNewCategoryDescription] = useState("");
+    const [creatingCategory, setCreatingCategory] = useState(false);
+
+    const handleCreateCategory = async () => {
+        if (!newCategoryName.trim()) {
+            return Alert.alert("Error", "Please enter a category name");
+        }
+
+        try {
+            setCreatingCategory(true);
+            const { createCategory } = await import("@/lib/appwrite");
+
+            await createCategory({
+                name: newCategoryName.trim(),
+                description: newCategoryDescription.trim(),
+                restaurantId: currentRestaurantId,
+            });
+
+            setNewCategoryName("");
+            setNewCategoryDescription("");
+            setShowCategoryModal(false);
+            onCategoryCreated();
+            Alert.alert("Success", "Category created successfully!");
+        } catch (err) {
+            console.error("Create category error:", err);
+            Alert.alert("Error", "Failed to create category");
+        } finally {
+            setCreatingCategory(false);
+        }
+    };
+
     return (
-        <Modal visible={visible} animationType="slide" transparent>
-            <View className="flex-1 bg-black/50 justify-end">
-                <View className="bg-white rounded-t-3xl max-h-[90%]">
-                    <View className="flex-row justify-between items-center p-5 border-b border-gray-100">
-                        <Text className="text-xl font-bold text-gray-900">
-                            {editMode ? "Edit Item" : "Add New Item"}
-                        </Text>
-                        <Pressable onPress={onClose}>
-                            <Ionicons name="close" size={28} color="#666" />
-                        </Pressable>
-                    </View>
-
-                    <ScrollView className="p-5">
-                        <Pressable
-                            onPress={onPickImage}
-                            className="bg-gray-100 h-40 rounded-xl items-center justify-center mb-4"
+        <>
+            {/* Main Menu Item Form Modal */}
+            <Modal
+                visible={visible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={onClose}
+            >
+                <View className="flex-1 bg-black/60">
+                    <View className="flex-1 mt-20">
+                        <LinearGradient
+                            colors={['#fff7ed', '#fef3c7', '#fde68a']}
+                            className="flex-1 rounded-t-[40px] overflow-hidden"
                         >
-                            {formData.imageUri ? (
-                                <Image source={{ uri: formData.imageUri }} className="w-full h-full rounded-xl" />
-                            ) : (
-                                <View className="items-center">
-                                    <Ionicons name="image-outline" size={48} color="#ccc" />
-                                    <Text className="text-gray-500 mt-2">Tap to select image</Text>
+                            {/* Recipe Card Header */}
+                            <View className="bg-orange-500 px-6 py-6 relative">
+                                <View className="absolute top-0 right-0 w-24 h-24">
+                                    <View className="absolute top-0 right-0 w-0 h-0 border-t-[90px] border-r-[90px] border-t-orange-600 border-r-transparent opacity-50" />
                                 </View>
-                            )}
-                        </Pressable>
 
-                        <TextInput
-                            placeholder="Item Name *"
-                            value={formData.name}
-                            onChangeText={(text) => onFormChange("name", text)}
-                            className="border border-gray-300 rounded-xl p-4 mb-3 text-base"
-                        />
-
-                        <TextInput
-                            placeholder="Description *"
-                            value={formData.description}
-                            onChangeText={(text) => onFormChange("description", text)}
-                            className="border border-gray-300 rounded-xl p-4 mb-3 text-base h-24"
-                            multiline
-                            textAlignVertical="top"
-                        />
-
-                        <TextInput
-                            placeholder="Price *"
-                            value={formData.price}
-                            onChangeText={(text) => onFormChange("price", text)}
-                            keyboardType="decimal-pad"
-                            className="border border-gray-300 rounded-xl p-4 mb-3 text-base"
-                        />
-
-                        <View className="border border-gray-300 rounded-xl mb-3 overflow-hidden">
-                            <Text className="text-gray-500 text-xs px-4 pt-3 pb-1">Category *</Text>
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4 pb-3">
-                                {categories.map((cat) => (
-                                    <Pressable
-                                        key={cat.$id}
-                                        onPress={() => onFormChange("category", cat.$id)}
-                                        className={`px-4 py-2 rounded-full mr-2 ${
-                                            formData.category === cat.$id ? "bg-primary" : "bg-gray-100"
-                                        }`}
-                                    >
-                                        <Text
-                                            className={`font-semibold ${
-                                                formData.category === cat.$id ? "text-white" : "text-gray-700"
-                                            }`}
-                                        >
-                                            {cat.name}
+                                <View className="flex-row justify-between items-start">
+                                    <View className="flex-1">
+                                        <View className="flex-row items-center mb-2">
+                                            <View className="w-1 h-6 bg-white rounded-full mr-2" />
+                                            <Text className="text-white/90 text-xs font-bold tracking-widest uppercase">
+                                                {editMode ? "Update Recipe" : "New Recipe"}
+                                            </Text>
+                                        </View>
+                                        <Text className="text-white text-3xl font-bold">
+                                            {editMode ? "Edit Dish" : "Create Dish"}
                                         </Text>
+                                        <Text className="text-white/80 text-sm mt-1">
+                                            Craft your signature creation
+                                        </Text>
+                                    </View>
+                                    <Pressable
+                                        onPress={onClose}
+                                        className="bg-white/20 w-10 h-10 rounded-full items-center justify-center active:scale-95"
+                                    >
+                                        <Ionicons name="close" size={24} color="white" />
                                     </Pressable>
-                                ))}
+                                </View>
+                            </View>
+
+                            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+                                <View className="p-6 space-y-5">
+                                    {/* Image Upload Section */}
+                                    <View>
+                                        <Text className="text-gray-900 text-sm font-bold mb-3 uppercase tracking-wide">
+                                            📸 Dish Photo
+                                        </Text>
+                                        <Pressable
+                                            onPress={onPickImage}
+                                            className="bg-white rounded-3xl overflow-hidden border-2 border-dashed border-orange-300 active:scale-[0.98]"
+                                            style={{
+                                                shadowColor: '#f97316',
+                                                shadowOffset: { width: 0, height: 4 },
+                                                shadowOpacity: 0.15,
+                                                shadowRadius: 12,
+                                                elevation: 5,
+                                            }}
+                                        >
+                                            {formData.imageUri ? (
+                                                <View className="relative">
+                                                    <Image
+                                                        source={{ uri: formData.imageUri }}
+                                                        className="w-full h-48"
+                                                        resizeMode="cover"
+                                                    />
+                                                    <View className="absolute inset-0 bg-black/40 items-center justify-center">
+                                                        <View className="bg-white/90 rounded-full p-3 mb-2">
+                                                            <Ionicons name="camera" size={28} color="#f97316" />
+                                                        </View>
+                                                        <Text className="text-white font-bold">Tap to change photo</Text>
+                                                    </View>
+                                                </View>
+                                            ) : (
+                                                <View className="h-48 items-center justify-center">
+                                                    <View className="bg-orange-100 rounded-full p-4 mb-3">
+                                                        <Ionicons name="camera" size={40} color="#f97316" />
+                                                    </View>
+                                                    <Text className="text-gray-900 font-bold text-base">Add Photo</Text>
+                                                    <Text className="text-gray-500 text-sm mt-1">Showcase your dish</Text>
+                                                </View>
+                                            )}
+                                        </Pressable>
+                                    </View>
+
+                                    {/* Dish Name */}
+                                    <View>
+                                        <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
+                                            🍽️ Dish Name
+                                        </Text>
+                                        <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden">
+                                            <TextInput
+                                                value={formData.name}
+                                                onChangeText={(val) => onFormChange("name", val)}
+                                                placeholder="e.g., Grilled Salmon with Herbs"
+                                                placeholderTextColor="#9ca3af"
+                                                className="px-4 py-4 text-gray-900 text-base font-semibold"
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {/* Description */}
+                                    <View>
+                                        <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
+                                            📝 Description
+                                        </Text>
+                                        <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden">
+                                            <TextInput
+                                                value={formData.description}
+                                                onChangeText={(val) => onFormChange("description", val)}
+                                                placeholder="Describe your culinary masterpiece..."
+                                                placeholderTextColor="#9ca3af"
+                                                className="px-4 py-4 text-gray-900 text-base"
+                                                multiline
+                                                numberOfLines={3}
+                                                textAlignVertical="top"
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {/* Price */}
+                                    <View>
+                                        <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
+                                            💰 Price
+                                        </Text>
+                                        <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden flex-row items-center">
+                                            <Text className="pl-4 text-gray-900 text-lg font-bold">$</Text>
+                                            <TextInput
+                                                value={formData.price}
+                                                onChangeText={(val) => onFormChange("price", val)}
+                                                placeholder="0.00"
+                                                placeholderTextColor="#9ca3af"
+                                                keyboardType="decimal-pad"
+                                                className="flex-1 px-2 py-4 text-gray-900 text-base font-semibold"
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {/* Category */}
+                                    <View>
+                                        <View className="flex-row items-center justify-between mb-2">
+                                            <Text className="text-gray-900 text-sm font-bold uppercase tracking-wide">
+                                                🏷️ Category
+                                            </Text>
+                                            <Pressable
+                                                onPress={() => setShowCategoryModal(true)}
+                                                className="active:scale-95"
+                                            >
+                                                <View className="bg-orange-500 px-3 py-1.5 rounded-full flex-row items-center">
+                                                    <Ionicons name="add" size={14} color="white" />
+                                                    <Text className="text-white text-xs font-bold ml-1">New</Text>
+                                                </View>
+                                            </Pressable>
+                                        </View>
+                                        <ScrollView
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            className="flex-row gap-2"
+                                        >
+                                            {categories.map((cat) => (
+                                                <Pressable
+                                                    key={cat.$id}
+                                                    onPress={() => onFormChange("category", cat.$id)}
+                                                    className="active:scale-95"
+                                                >
+                                                    <View className={`px-4 py-3 rounded-xl border-2 ${
+                                                        formData.category === cat.$id
+                                                            ? "bg-orange-500 border-orange-500"
+                                                            : "bg-white border-orange-200"
+                                                    }`}>
+                                                        <Text className={`font-bold text-sm ${
+                                                            formData.category === cat.$id
+                                                                ? "text-white"
+                                                                : "text-gray-700"
+                                                        }`}>
+                                                            {cat.name}
+                                                        </Text>
+                                                    </View>
+                                                </Pressable>
+                                            ))}
+                                        </ScrollView>
+                                    </View>
+
+                                    {/* Divider */}
+                                    <View className="border-t-2 border-dashed border-orange-300 my-2" />
+
+                                    {/* Nutrition Info */}
+                                    <View>
+                                        <Text className="text-gray-900 text-sm font-bold mb-3 uppercase tracking-wide">
+                                            ⚡ Nutrition Facts
+                                        </Text>
+                                        <View className="flex-row gap-3">
+                                            <View className="flex-1">
+                                                <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden">
+                                                    <View className="flex-row items-center px-4 py-4">
+                                                        <Ionicons name="flame" size={20} color="#f97316" />
+                                                        <TextInput
+                                                            value={formData.calories}
+                                                            onChangeText={(val) => onFormChange("calories", val)}
+                                                            placeholder="Calories"
+                                                            placeholderTextColor="#9ca3af"
+                                                            keyboardType="number-pad"
+                                                            className="flex-1 ml-2 text-gray-900 text-base font-semibold"
+                                                        />
+                                                    </View>
+                                                </View>
+                                            </View>
+                                            <View className="flex-1">
+                                                <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden">
+                                                    <View className="flex-row items-center px-4 py-4">
+                                                        <Ionicons name="fitness" size={20} color="#10b981" />
+                                                        <TextInput
+                                                            value={formData.protein}
+                                                            onChangeText={(val) => onFormChange("protein", val)}
+                                                            placeholder="Protein (g)"
+                                                            placeholderTextColor="#9ca3af"
+                                                            keyboardType="number-pad"
+                                                            className="flex-1 ml-2 text-gray-900 text-base font-semibold"
+                                                        />
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+
+                                    {/* Action Buttons */}
+                                    <View className="flex-row gap-3 pt-4 pb-6">
+                                        <Pressable
+                                            onPress={onClose}
+                                            className="flex-1 bg-gray-200 py-4 rounded-2xl active:scale-95"
+                                        >
+                                            <Text className="text-gray-700 text-center font-bold text-base">
+                                                Cancel
+                                            </Text>
+                                        </Pressable>
+                                        <Pressable
+                                            onPress={onSave}
+                                            disabled={loading}
+                                            className="flex-[2] active:scale-95"
+                                        >
+                                            <LinearGradient
+                                                colors={['#f97316', '#ea580c']}
+                                                className="py-4 rounded-2xl flex-row items-center justify-center"
+                                                style={{
+                                                    shadowColor: '#f97316',
+                                                    shadowOffset: { width: 0, height: 6 },
+                                                    shadowOpacity: 0.4,
+                                                    shadowRadius: 12,
+                                                    elevation: 8,
+                                                }}
+                                            >
+                                                {loading ? (
+                                                    <>
+                                                        <ActivityIndicator color="white" size="small" />
+                                                        <Text className="text-white font-bold text-base ml-2">
+                                                            Saving...
+                                                        </Text>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Ionicons name="checkmark-circle" size={24} color="white" />
+                                                        <Text className="text-white font-bold text-base ml-2">
+                                                            {editMode ? "Update Dish" : "Create Dish"}
+                                                        </Text>
+                                                    </>
+                                                )}
+                                            </LinearGradient>
+                                        </Pressable>
+                                    </View>
+                                </View>
                             </ScrollView>
-                        </View>
 
-                        <View className="flex-row gap-3">
-                            <TextInput
-                                placeholder="Calories"
-                                value={formData.calories}
-                                onChangeText={(text) => onFormChange("calories", text)}
-                                keyboardType="number-pad"
-                                className="border border-gray-300 rounded-xl p-4 flex-1 text-base"
-                            />
-                            <TextInput
-                                placeholder="Protein (g)"
-                                value={formData.protein}
-                                onChangeText={(text) => onFormChange("protein", text)}
-                                keyboardType="number-pad"
-                                className="border border-gray-300 rounded-xl p-4 flex-1 text-base"
-                            />
-                        </View>
-                    </ScrollView>
-
-                    <View className="p-5 border-t border-gray-100">
-                        <Pressable
-                            onPress={onSave}
-                            disabled={loading}
-                            className="bg-primary rounded-xl py-4 items-center"
-                        >
-                            {loading ? (
-                                <ActivityIndicator color="white" />
-                            ) : (
-                                <Text className="text-white font-bold text-base">
-                                    {editMode ? "Update Item" : "Create Item"}
-                                </Text>
-                            )}
-                        </Pressable>
+                            {/* Scalloped Bottom Edge */}
+                            <View className="h-5 bg-amber-100 flex-row">
+                                {[...Array(12)].map((_, i) => (
+                                    <View
+                                        key={i}
+                                        className="flex-1 bg-slate-950 rounded-t-full"
+                                        style={{ marginHorizontal: 1 }}
+                                    />
+                                ))}
+                            </View>
+                        </LinearGradient>
                     </View>
                 </View>
-            </View>
-        </Modal>
+            </Modal>
+
+            {/* Create Category Mini Modal */}
+            <Modal
+                visible={showCategoryModal}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setShowCategoryModal(false)}
+            >
+                <View className="flex-1 bg-black/70 items-center justify-center px-6">
+                    <View className="bg-amber-50 rounded-3xl overflow-hidden w-full max-w-md"
+                          style={{
+                              shadowColor: '#f97316',
+                              shadowOffset: { width: 0, height: 8 },
+                              shadowOpacity: 0.3,
+                              shadowRadius: 16,
+                              elevation: 10,
+                          }}
+                    >
+                        {/* Header */}
+                        <View className="bg-orange-500 px-6 py-5">
+                            <View className="flex-row justify-between items-center">
+                                <View>
+                                    <Text className="text-white text-2xl font-bold">New Category</Text>
+                                    <Text className="text-white/80 text-sm mt-1">Add a menu section</Text>
+                                </View>
+                                <Pressable
+                                    onPress={() => setShowCategoryModal(false)}
+                                    className="bg-white/20 w-9 h-9 rounded-full items-center justify-center active:scale-95"
+                                >
+                                    <Ionicons name="close" size={20} color="white" />
+                                </Pressable>
+                            </View>
+                        </View>
+
+                        {/* Form */}
+                        <View className="p-6 space-y-4">
+                            <View>
+                                <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
+                                    🏷️ Category Name
+                                </Text>
+                                <View className="bg-white rounded-xl border-2 border-orange-200">
+                                    <TextInput
+                                        value={newCategoryName}
+                                        onChangeText={setNewCategoryName}
+                                        placeholder="e.g., Appetizers, Main Course"
+                                        placeholderTextColor="#9ca3af"
+                                        className="px-4 py-3 text-gray-900 text-base font-semibold"
+                                    />
+                                </View>
+                            </View>
+
+                            <View>
+                                <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
+                                    📝 Description (Optional)
+                                </Text>
+                                <View className="bg-white rounded-xl border-2 border-orange-200">
+                                    <TextInput
+                                        value={newCategoryDescription}
+                                        onChangeText={setNewCategoryDescription}
+                                        placeholder="Brief description..."
+                                        placeholderTextColor="#9ca3af"
+                                        className="px-4 py-3 text-gray-900 text-base"
+                                        multiline
+                                        numberOfLines={2}
+                                        textAlignVertical="top"
+                                    />
+                                </View>
+                            </View>
+
+                            {/* Buttons */}
+                            <View className="flex-row gap-3 pt-2">
+                                <Pressable
+                                    onPress={() => setShowCategoryModal(false)}
+                                    className="flex-1 bg-gray-200 py-3 rounded-xl active:scale-95"
+                                >
+                                    <Text className="text-gray-700 text-center font-bold">Cancel</Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={handleCreateCategory}
+                                    disabled={creatingCategory}
+                                    className="flex-1 active:scale-95"
+                                >
+                                    <LinearGradient
+                                        colors={['#f97316', '#ea580c']}
+                                        className="py-3 rounded-xl items-center justify-center"
+                                    >
+                                        {creatingCategory ? (
+                                            <>
+                                                <ActivityIndicator color="white" size="small" />
+                                            </>
+                                        ) : (
+                                            <Text className="text-white font-bold">Create</Text>
+                                        )}
+                                    </LinearGradient>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </>
     );
 };

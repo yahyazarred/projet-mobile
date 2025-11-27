@@ -113,6 +113,12 @@ export default function MenuItemsManagement() {
             setLoading(false);
         }
     };
+    const handleCategoryCreated = async () => {
+        console.log("Category created, reloading categories...");
+        await loadData(); // reloads categories so the new one shows up in the list
+    };
+
+
 
     const openAddModal = () => {
         if (categories.length === 0) {
@@ -449,11 +455,14 @@ export default function MenuItemsManagement() {
                 formData={formData}
                 categories={categories}
                 loading={loading}
+                currentRestaurantId={currentRestaurantId} // ✅ add this
                 onClose={closeModal}
                 onSave={handleSave}
                 onPickImage={handlePickImage}
                 onFormChange={handleFormChange}
+                onCategoryCreated={handleCategoryCreated} // ✅ add this
             />
+
         </View>
     );
 }

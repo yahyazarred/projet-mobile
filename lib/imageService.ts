@@ -41,62 +41,61 @@ export const pickImage = async (): Promise<string | null> => {
 
 export const uploadImage = async (uri: string): Promise<string> => {
     try {
-        console.log("Uploading image from URI:", uri);
+        console.log("Uploading image:", uri);
 
         const filename = `menu-${Date.now()}.jpg`;
-        let file: any;
+        const fileId = ID.unique();
 
-        // Check if it's a base64 data URI (Web platform)
-        if (uri.startsWith('data:')) {
-            console.log("Base64 data URI detected - converting to Blob for web upload");
+        // Convert to blob
+        const response = await fetch(uri);
+        const blob = await response.blob();
 
-            const response = await fetch(uri);
-            const blob = await response.blob();
+        console.log("Blob converted:", blob.size, "bytes");
 
-            file = new File([blob], filename, { type: 'image/jpeg' });
-            console.log("Converted to File object:", file.size, "bytes");
-        } else {
-            // For React Native mobile (file:// or content:// URIs)
-            file = {
-                uri: uri,
-                name: filename,
-                type: 'image/jpeg',
-            };
-            console.log("Using native file URI");
-        }
+        // Build FormData manually
+        const formData = new FormData();
+        formData.append("fileId", fileId);
+        formData.append("file", {
+            uri,
+            type: blob.type || "image/jpeg",
+            name: filename
+        } as any);
 
-        console.log("Creating file in storage...");
+        console.log("Uploading to Appwrite via REST...");
 
-        const uploadedFile = await storage.createFile(
-            BUCKET_ID,
-            ID.unique(),
-            file
+        const uploadRes = await fetch(
+            `${appwriteConfig.endpoint}/storage/buckets/${BUCKET_ID}/files`,
+            {
+                method: "POST",
+                headers: {
+                    "X-Appwrite-Project": appwriteConfig.projectId,
+
+                },
+                body: formData
+            }
         );
 
-        if (!uploadedFile || !uploadedFile.$id) {
-            throw new Error("File upload failed - no file ID returned from server");
+        if (!uploadRes.ok) {
+            const errorText = await uploadRes.text();
+            console.error("Upload error:", errorText);
+            throw new Error("Upload failed: " + uploadRes.status);
         }
 
-        console.log("File uploaded successfully with ID:", uploadedFile.$id);
+        const uploadedFile = await uploadRes.json();
 
-        const fileUrl = `${appwriteConfig.endpoint}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${appwriteConfig.projectId}`;
+        console.log("Upload success:", uploadedFile);
 
-        console.log("File URL:", fileUrl);
+        const fileUrl = `${appwriteConfig.endpoint}/storage/buckets/${BUCKET_ID}/files/${uploadedFile.$id}/view?project=${appwriteConfig.projectId}&mode=public`;
+
+
         return fileUrl;
-    } catch (error: any) {
-        console.error("Upload image error:", error);
 
-        if (error.message?.includes('404')) {
-            throw new Error("Storage bucket not found. Please check your Appwrite configuration.");
-        } else if (error.message?.includes('401')) {
-            throw new Error("Unauthorized. Please check your Appwrite permissions.");
-        } else if (error.message?.includes('413')) {
-            throw new Error("File too large. Please select a smaller image.");
-        } else {
-            throw new Error(`Failed to upload image: ${error.message || 'Unknown error'}`);
-        }
+    } catch (error: any) {
+        console.error("Upload failed:", error);
+        throw new Error(error.message);
     }
 };
+
 
 export const deleteImageFromStorage = async (imageUrl: string): Promise<void> => {
     try {
