@@ -1,9 +1,11 @@
-import { View, Text, Alert, KeyboardAvoidingView, Platform, Dimensions, Animated } from "react-native";
+import { View, Text, Alert, KeyboardAvoidingView, Platform, Dimensions, Animated, Image, TouchableOpacity } from "react-native";
 import { Link, router } from "expo-router";
 import { useState, useRef, useEffect } from "react";
+import * as ImagePicker from "expo-image-picker";
 import CustomInput from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
-import { createUser, createRestaurant, logout, getCurrentUser } from "@/lib/appwrite";
+import { createUser, createRestaurant, logout, getCurrentUser} from "@/lib/appwrite";
+import { uploadImage } from "@/lib/imageService";
 import LottieView from "lottie-react-native";
 
 const OwnerSignUp = () => {
@@ -16,8 +18,9 @@ const OwnerSignUp = () => {
         description: "",
     });
 
-    // Animated values for stagger
+    // added an extra slot for the image picker -> total 8 animation entries now
     const animations = useRef([
+        new Animated.Value(50), // image picker
         new Animated.Value(50), // email
         new Animated.Value(50), // password
         new Animated.Value(50), // ownerName
@@ -35,9 +38,18 @@ const OwnerSignUp = () => {
         new Animated.Value(0),
         new Animated.Value(0),
         new Animated.Value(0),
+        new Animated.Value(0),
     ]).current;
 
     useEffect(() => {
+        // request gallery permission on mount
+        (async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== "granted") {
+                Alert.alert("Permission required", "Please allow gallery access to upload a restaurant photo.");
+            }
+        })();
+
         const animatedSequence = animations.map((anim, i) =>
             Animated.parallel([
                 Animated.timing(anim, {
@@ -56,6 +68,28 @@ const OwnerSignUp = () => {
         Animated.stagger(150, animatedSequence).start();
     }, []);
 
+    const [restaurantImage, setRestaurantImage] = useState<string | null>(null);
+
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 0.7,
+            });
+
+            if (result.canceled) {
+                return;
+            }
+
+            // For modern expo-image-picker result.assets[0].uri
+            setRestaurantImage(result.assets[0].uri);
+        } catch (err) {
+            console.error("Image pick error:", err);
+            Alert.alert("Error", "Could not pick image. Try again.");
+        }
+    };
+
     const submit = async () => {
         const { email, password, ownerName, restaurantName, description } = form;
 
@@ -63,11 +97,16 @@ const OwnerSignUp = () => {
             return Alert.alert("Error", "Please fill in all fields.");
         }
 
+        if (!restaurantImage) {
+            return Alert.alert("Error", "Please select a restaurant photo.");
+        }
+
         setIsSubmitting(true);
 
         try {
             await logout().catch(() => null);
 
+            // 1 - create user
             await createUser({
                 email,
                 password,
@@ -78,15 +117,19 @@ const OwnerSignUp = () => {
             const user = await getCurrentUser();
             if (!user) throw new Error("User creation failed");
 
+            // 2 - upload restaurant image (uses your existing uploadImage function)
+            const uploadedPhotoUrl = await uploadImage(restaurantImage);
+
+            // 3 - create restaurant with photo url
             await createRestaurant({
                 ownerId: user.accountId,
                 name: restaurantName,
                 description,
+                photo: uploadedPhotoUrl,
             });
 
             Alert.alert("Success", "Restaurant created!");
             router.replace("/sign-in");
-
         } catch (error: any) {
             console.error("OwnerSignUp error:", error);
             Alert.alert("Error", error.message || "Failed to create restaurant");
@@ -127,8 +170,34 @@ const OwnerSignUp = () => {
 
             {/* --- FORM WITH STAGGERED ANIMATION --- */}
             <View className="gap-3 bg-amber-50 rounded-lg">
+                {/* --- RESTAURANT IMAGE PICKER --- */}
+                <Animated.View style={{ transform: [{ translateY: animations[0] }], opacity: opacityValues[0], marginBottom: 10 }}>
+                    <TouchableOpacity
+                        onPress={pickImage}
+                        style={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: 10,
+                            backgroundColor: "#f5d7a1",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            alignSelf: "center",
+                            overflow: "hidden",
+                        }}
+                    >
+                        {restaurantImage ? (
+                            <Image
+                                source={{ uri: restaurantImage }}
+                                style={{ width: "100%", height: "100%" }}
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <Text style={{ color: "#9a6110", fontWeight: "bold" }}>Add Photo</Text>
+                        )}
+                    </TouchableOpacity>
+                </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[0] }], opacity: opacityValues[0] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[1] }], opacity: opacityValues[1] }}>
                     <CustomInput
                         label="Email"
                         placeholder="Enter your email"
@@ -137,7 +206,7 @@ const OwnerSignUp = () => {
                     />
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[1] }], opacity: opacityValues[1] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[2] }], opacity: opacityValues[2] }}>
                     <CustomInput
                         label="Password"
                         placeholder="Enter password"
@@ -147,7 +216,7 @@ const OwnerSignUp = () => {
                     />
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[2] }], opacity: opacityValues[2] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[3] }], opacity: opacityValues[3] }}>
                     <CustomInput
                         label="Owner Name"
                         placeholder="Enter owner's full name"
@@ -156,7 +225,7 @@ const OwnerSignUp = () => {
                     />
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[3] }], opacity: opacityValues[3] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[4] }], opacity: opacityValues[4] }}>
                     <CustomInput
                         label="Restaurant Name"
                         placeholder="Enter your restaurant name"
@@ -165,7 +234,7 @@ const OwnerSignUp = () => {
                     />
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[4] }], opacity: opacityValues[4] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[5] }], opacity: opacityValues[5] }}>
                     <CustomInput
                         label="Description"
                         placeholder="Describe your restaurant"
@@ -175,7 +244,7 @@ const OwnerSignUp = () => {
                     />
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[5] }], opacity: opacityValues[5] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[6] }], opacity: opacityValues[6] }}>
                     <CustomButton
                         title="Sign up as restaurant owner"
                         isLoading={isSubmitting}
@@ -184,7 +253,7 @@ const OwnerSignUp = () => {
                     />
                 </Animated.View>
 
-                <Animated.View style={{ transform: [{ translateY: animations[6] }], opacity: opacityValues[6] }}>
+                <Animated.View style={{ transform: [{ translateY: animations[7] }], opacity: opacityValues[7] }}>
                     <View className="items-center mt-3">
                         <Text className="text-gray-700 text-sm">Already have an account?</Text>
                         <Link href="../(signup-choice)/sign-up-choice">
@@ -192,7 +261,6 @@ const OwnerSignUp = () => {
                         </Link>
                     </View>
                 </Animated.View>
-
             </View>
         </KeyboardAvoidingView>
     );

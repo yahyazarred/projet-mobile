@@ -1,54 +1,29 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-    FlatList,
     Image,
-    Pressable,
     Text,
     TouchableOpacity,
     View,
     TextInput,
-    ScrollView
+    ScrollView,
+    ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CartButton from "@/components/CartButton";
-import { images, offers } from "@/constants";
 import useAuthStore from "@/store/auth.store";
+import { useEffect, useState } from "react";
+import { getRestaurants } from "@/lib/appwrite";
 
 export default function Index() {
     const { user } = useAuthStore();
+    const [restaurants, setRestaurants] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const categories = [
         { id: '1', name: 'Breakfast', icon: 'sunny-outline', color: '#FEF3C7' },
         { id: '2', name: 'Lunch', icon: 'restaurant-outline', color: '#FED7AA' },
         { id: '3', name: 'Dinner', icon: 'moon-outline', color: '#DBEAFE' },
         { id: '4', name: 'Desserts', icon: 'ice-cream-outline', color: '#FECACA' },
-    ];
-
-    const popularRestaurants = [
-        {
-            id: '1',
-            name: 'Golden Fork',
-            cuisine: 'Mediterranean',
-            rating: 4.8,
-            deliveryTime: '25-35',
-            image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'
-        },
-        {
-            id: '2',
-            name: 'Spice House',
-            cuisine: 'Indian',
-            rating: 4.6,
-            deliveryTime: '30-40',
-            image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400'
-        },
-        {
-            id: '3',
-            name: 'Pizza Palace',
-            cuisine: 'Italian',
-            rating: 4.9,
-            deliveryTime: '20-30',
-            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400'
-        },
     ];
 
     const specialOffers = [
@@ -67,6 +42,20 @@ export default function Index() {
             image: require('@/assets/images/lunch.png'),
         },
     ];
+
+    useEffect(() => {
+        async function load() {
+            try {
+                const data = await getRestaurants();
+                setRestaurants(data);
+            } catch (e) {
+                console.log(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+        load();
+    }, []);
 
     return (
         <SafeAreaView className="flex-1 bg-amber-50">
@@ -93,7 +82,7 @@ export default function Index() {
                     <View className="bg-white rounded-2xl flex-row items-center px-4 py-3 shadow-sm">
                         <Ionicons name="search" size={20} color="#9CA3AF" />
                         <TextInput
-                            placeholder="Search for restaurants or dishes..."
+                            placeholder="Search for restaurants..."
                             placeholderTextColor="#9CA3AF"
                             className="flex-1 ml-3 text-gray-900 text-base"
                         />
@@ -103,7 +92,7 @@ export default function Index() {
                     </View>
                 </View>
 
-                {/* Special Offers Banner */}
+                {/* Special Offers */}
                 <View className="px-5 mb-6">
                     <Text className="text-xl font-bold text-gray-900 mb-3">
                         Special Offers 🔥
@@ -113,7 +102,7 @@ export default function Index() {
                         showsHorizontalScrollIndicator={false}
                         className="gap-3"
                     >
-                        {specialOffers.map((offer, index) => (
+                        {specialOffers.map((offer) => (
                             <TouchableOpacity
                                 key={offer.id}
                                 className="rounded-2xl overflow-hidden mr-3"
@@ -170,59 +159,49 @@ export default function Index() {
                     </View>
                 </View>
 
-                {/* Popular Restaurants */}
+                {/* REAL Restaurants */}
                 <View className="px-5 mb-6">
-                    <View className="flex-row justify-between items-center mb-3">
-                        <Text className="text-xl font-bold text-gray-900">
-                            Popular Restaurants
-                        </Text>
-                        <TouchableOpacity>
-                            <Text className="text-amber-600 font-semibold">See All</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <Text className="text-xl font-bold text-gray-900 mb-3">
+                        Popular Restaurants
+                    </Text>
 
-                    {popularRestaurants.map((restaurant) => (
-                        <TouchableOpacity
-                            key={restaurant.id}
-                            className="bg-white rounded-2xl mb-3 overflow-hidden shadow-sm"
-                            activeOpacity={0.8}
-                        >
-                            <Image
-                                source={{ uri: restaurant.image }}
-                                className="w-full h-40"
-                                resizeMode="cover"
-                            />
-                            <View className="p-4">
-                                <View className="flex-row justify-between items-start mb-2">
-                                    <View className="flex-1">
-                                        <Text className="text-lg font-bold text-gray-900 mb-1">
-                                            {restaurant.name}
-                                        </Text>
-                                        <Text className="text-sm text-gray-600">
-                                            {restaurant.cuisine}
-                                        </Text>
-                                    </View>
-                                    <View className="bg-amber-50 px-2 py-1 rounded-lg flex-row items-center">
-                                        <Ionicons name="star" size={14} color="#D97706" />
-                                        <Text className="text-sm font-bold text-amber-700 ml-1">
-                                            {restaurant.rating}
-                                        </Text>
-                                    </View>
-                                </View>
-                                <View className="flex-row items-center">
-                                    <Ionicons name="time-outline" size={16} color="#6B7280" />
-                                    <Text className="text-sm text-gray-600 ml-1">
-                                        {restaurant.deliveryTime} min
+                    {loading && (
+                        <ActivityIndicator size="large" color="#D97706" className="mt-4" />
+                    )}
+
+                    {!loading && restaurants.length === 0 && (
+                        <Text className="text-center text-gray-500 mt-4">
+                            No restaurants added yet.
+                        </Text>
+                    )}
+
+                    {!loading &&
+                        restaurants.map((restaurant) => (
+                            <TouchableOpacity
+                                key={restaurant.$id}
+                                className="bg-white rounded-2xl mb-3 overflow-hidden shadow-sm"
+                                activeOpacity={0.8}
+                            >
+                                {/* Restaurant Image */}
+                                <Image
+                                    source={{ uri: restaurant.photoUrl }}
+                                    className="w-full h-40"
+                                    resizeMode="cover"
+                                />
+
+                                <View className="p-4">
+                                    {/* Restaurant Name */}
+                                    <Text className="text-lg font-bold text-gray-900 mb-1">
+                                        {restaurant.name}
                                     </Text>
-                                    <View className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-                                    <Ionicons name="bicycle-outline" size={16} color="#6B7280" />
-                                    <Text className="text-sm text-gray-600 ml-1">
-                                        Free delivery
+
+                                    {/* Description */}
+                                    <Text className="text-sm text-gray-600">
+                                        {restaurant.description}
                                     </Text>
                                 </View>
-                            </View>
-                        </TouchableOpacity>
-                    ))}
+                            </TouchableOpacity>
+                        ))}
                 </View>
             </ScrollView>
         </SafeAreaView>

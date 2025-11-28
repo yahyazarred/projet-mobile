@@ -57,20 +57,23 @@ export const createRestaurant = async ({
                                            ownerId,
                                            name,
                                            description,
+                                           photo, // <-- NEW FIELD
                                        }: {
     ownerId: string;
     name: string;
     description: string;
+    photo: string;     // <-- must be string (URL from upload)
 }) => {
     try {
         return await databases.createDocument(
             appwriteConfig.databaseId,
-            appwriteConfig.restaurantCollectionId, // MUST be the correct ID
+            appwriteConfig.restaurantCollectionId,
             ID.unique(),
             {
                 ownerId,
                 name,
                 description,
+                photo, // <-- store photo URL here
             }
         );
     } catch (e) {
@@ -78,6 +81,27 @@ export const createRestaurant = async ({
         throw e;
     }
 };
+
+// ---------------- GET ALL RESTAURANTS ----------------
+export const getRestaurants = async () => {
+    try {
+        const res = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.restaurantCollectionId
+        );
+
+        // Map documents to include photo URL
+        return res.documents.map(doc => ({
+            ...doc,
+            photoUrl: doc.photo, // <-- use the 'photo' field directly
+        }));
+    } catch (e) {
+        console.error("Get restaurants error:", e);
+        return [];
+    }
+};
+
+
 
 // ---------------- CREATE CATEGORY ----------------
 export const createCategory = async ({
