@@ -14,13 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import useAppwrite from "@/lib/useAppwrite";
 import LottieView from "lottie-react-native";
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-    FadeInUp,
-    FadeInDown,
-    FadeIn,
-    SlideInRight,
-    withDelay,
-} from "react-native-reanimated";
+// ❌ REMOVED: Animated imports
 
 const RestaurantProfile = () => {
     const { data: user, loading } = useAppwrite({ fn: getCurrentUser });
@@ -37,9 +31,9 @@ const RestaurantProfile = () => {
                     onPress: async () => {
                         try {
                             await logout();
-                            router.replace("../(auth)/sign-in");
+                            router.replace("/(auth)/sign-in");
                         } catch (error: any) {
-                            console.error("Logout error:", error);
+                            console.error("Logout error:", error?.message || String(error));
                             Alert.alert("Error", "Failed to log out. Please try again.");
                         }
                     },
@@ -128,7 +122,7 @@ const RestaurantProfile = () => {
                     <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
                         {/* Hero Header with Cover */}
-                        <Animated.View entering={FadeInUp.duration(600).delay(50)}>
+                        <View>
                             <View className="relative h-56">
                                 {/* Cover Image */}
                                 <Image
@@ -175,10 +169,10 @@ const RestaurantProfile = () => {
                                     />
                                 </View>
                             </View>
-                        </Animated.View>
+                        </View>
 
                         {/* Profile Info */}
-                        <Animated.View entering={FadeInUp.duration(600).delay(150)} className="px-6 mt-4 mb-6">
+                        <View className="px-6 mt-4 mb-6">
                             <View className="items-center mb-6">
                                 <Text className="text-white text-3xl font-bold mb-1">{user.name}</Text>
                                 <Text className="text-orange-400 text-base font-semibold">Restaurant Owner</Text>
@@ -187,10 +181,10 @@ const RestaurantProfile = () => {
                                     <Text className="text-slate-300 text-sm">Active Now</Text>
                                 </View>
                             </View>
-                        </Animated.View>
+                        </View>
 
                         {/* Quick Stats Cards */}
-                        <Animated.View entering={FadeInUp.duration(600).delay(250)} className="px-6 mb-6">
+                        <View className="px-6 mb-6">
                             <View className="bg-white/5 rounded-3xl p-6 border border-white/10">
                                 <Text className="text-white text-lg font-bold mb-4">Today's Overview</Text>
 
@@ -242,10 +236,10 @@ const RestaurantProfile = () => {
                                     </View>
                                 </View>
                             </View>
-                        </Animated.View>
+                        </View>
 
                         {/* Account Information */}
-                        <Animated.View entering={FadeInUp.duration(600).delay(350)} className="px-6 mb-6">
+                        <View className="px-6 mb-6">
                             <Text className="text-white text-lg font-bold mb-3">Account Details</Text>
 
                             <View className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
@@ -276,18 +270,15 @@ const RestaurantProfile = () => {
                                     </View>
                                 </View>
                             </View>
-                        </Animated.View>
+                        </View>
 
                         {/* Management Menu */}
-                        <Animated.View entering={FadeInUp.duration(600).delay(450)} className="px-6 mb-6">
+                        <View className="px-6 mb-6">
                             <Text className="text-white text-lg font-bold mb-3">Management</Text>
 
                             <View className="space-y-3">
                                 {menuItems.map((item, index) => (
-                                    <Animated.View
-                                        key={index}
-                                        entering={SlideInRight.duration(400).delay(500 + index * 50)}
-                                    >
+                                    <View key={index}>
                                         <TouchableOpacity
                                             className="bg-white/5 rounded-2xl p-4 border border-white/10 active:scale-98"
                                             onPress={() => Alert.alert("Navigation", `Going to ${item.label}`)}
@@ -310,13 +301,13 @@ const RestaurantProfile = () => {
                                                 </View>
                                             </View>
                                         </TouchableOpacity>
-                                    </Animated.View>
+                                    </View>
                                 ))}
                             </View>
-                        </Animated.View>
+                        </View>
 
                         {/* Logout Button */}
-                        <Animated.View entering={FadeInUp.duration(600).delay(900)} className="px-6 pb-8">
+                        <View className="px-6 pb-8">
                             <TouchableOpacity
                                 onPress={handleLogout}
                                 className="active:scale-98"
@@ -345,7 +336,7 @@ const RestaurantProfile = () => {
                             <Text className="text-slate-500 text-center text-xs mt-6">
                                 Restaurant Management System v2.0
                             </Text>
-                        </Animated.View>
+                        </View>
 
                     </ScrollView>
                 </SafeAreaView>

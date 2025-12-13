@@ -103,7 +103,7 @@ const DriverProfile = () => {
                 </View>
 
                 {/* Quick Stats */}
-                <View className="px-4 mb-6">
+                <View className="px-4 mb-6 ">
                     <View className="bg-white rounded-2xl p-4 shadow-sm">
                         <Text className="text-lg font-bold text-gray-900 mb-3">
                             Today's Stats
@@ -128,23 +128,23 @@ const DriverProfile = () => {
                 </View>
 
                 {/* This Week Overview */}
-                <View className="px-4 mb-6">
+                <View className="px-4 mb-6 ">
                     <View className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-4 shadow-sm">
-                        <Text className="text-white text-lg font-bold mb-3">
+                        <Text className="text-black text-lg font-bold mb-3">
                             This Week
                         </Text>
                         <View className="flex-row justify-between items-center">
                             <View>
-                                <Text className="text-white/80 text-xs mb-1">Total Deliveries</Text>
-                                <Text className="text-white text-2xl font-bold">48</Text>
+                                <Text className="text-black/80 text-xs mb-1">Total Deliveries</Text>
+                                <Text className="text-black text-2xl font-bold">48</Text>
                             </View>
                             <View>
-                                <Text className="text-white/80 text-xs mb-1">Total Earnings</Text>
-                                <Text className="text-white text-2xl font-bold">$336.00</Text>
+                                <Text className="text-black/80 text-xs mb-1">Total Earnings</Text>
+                                <Text className="text-black text-2xl font-bold">$336.00</Text>
                             </View>
                             <View>
-                                <Text className="text-white/80 text-xs mb-1">Avg. Time</Text>
-                                <Text className="text-white text-2xl font-bold">18m</Text>
+                                <Text className="text-black/80 text-xs mb-1">Avg. Time</Text>
+                                <Text className="text-black text-2xl font-bold">18m</Text>
                             </View>
                         </View>
                     </View>

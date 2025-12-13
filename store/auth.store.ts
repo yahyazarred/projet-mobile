@@ -32,7 +32,18 @@ const useAuthStore = create<AuthState>((set) => ({
             if(user) set({ isAuthenticated: true, user: user as User })
             else set( { isAuthenticated: false, user: null } );
         } catch (e) {
-            console.log('fetchAuthenticatedUser error', e);
+            // ✅ FIX: Safely log the error without causing _toString issues
+            console.log('fetchAuthenticatedUser error', e instanceof Error ? e.message : String(e));
+
+            // Optional: Log more details if available
+            if (e && typeof e === 'object') {
+                console.log('Error details:', {
+                    message: (e as any).message,
+                    code: (e as any).code,
+                    type: (e as any).type,
+                });
+            }
+
             set({ isAuthenticated: false, user: null })
         } finally {
             set({ isLoading: false });

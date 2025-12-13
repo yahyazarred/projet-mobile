@@ -59,13 +59,18 @@ const SignIn = () => {
             const user = await getCurrentUser();
             if (!user) throw new Error("User not found");
 
-            if (user.role === "restaurant_owner") router.replace("../(tabs2)/restaurant-profile");
-            else if (user.role === "driver") router.replace("../(tabs3)/driver-profile");
-            else router.replace("/");
+            // ✅ FIX: Corrected navigation paths (removed double slashes)
+            if (user.role === "restaurant_owner") {
+                router.replace("/(tabs2)/restaurant-profile");
+            } else if (user.role === "driver") {
+                router.replace("/(tabs3)/driver-profile");
+            } else {
+                router.replace("/(tabs)/profile");
+            }
 
         } catch (error: any) {
             Alert.alert("Error", error.message);
-            console.error("SignIn error:", error);
+            console.error("SignIn error:", error?.message || String(error));
         } finally {
             setIsSubmitting(false);
         }
@@ -150,7 +155,7 @@ const SignIn = () => {
                         >
                             <View className="flex justify-center flex-col items-center">
                                 <Text className="text-gray-700">Don't have an account?</Text>
-                                <Link href="../(signup-choice)/sign-up-choice">
+                                <Link href="/(signup-choice)/sign-up-choice">
                                     <Text className="text-red-700 font-semibold mt-1">Sign Up</Text>
                                 </Link>
                             </View>

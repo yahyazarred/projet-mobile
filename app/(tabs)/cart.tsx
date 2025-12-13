@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Alert, TextInput, Modal, Pressable, ScrollView } from 'react-native';
+import { View, Text, FlatList, Alert, TextInput, Modal, Pressable, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { useCartStore } from "@/store/cart.store";
@@ -11,6 +11,7 @@ import { createOrder, OrderItem } from "@/lib/orderService";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { getCurrentUser } from "@/lib/appwrite";
+import * as Location from 'expo-location';
 
 const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfoStripeProps) => (
     <View className="flex-between flex-row my-1">
@@ -26,6 +27,7 @@ const PaymentInfoStripe = ({ label, value, labelStyle, valueStyle }: PaymentInfo
 const Cart = () => {
     const { items, getTotalItems, getTotalPrice, clearCart } = useCartStore();
     const [loading, setLoading] = useState(false);
+    const [locationLoading, setLocationLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
 
     // Form data for order
@@ -38,6 +40,58 @@ const Cart = () => {
     const deliveryFee = 5.00;
     const discount = 0.50;
     const finalTotal = totalPrice + deliveryFee - discount;
+
+    const getCurrentAddress = async () => {
+        setLocationLoading(true);
+        try {
+            // Request permission
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert(
+                    'Permission Denied',
+                    'Please enable location permissions in settings to use this feature.'
+                );
+                setLocationLoading(false);
+                return;
+            }
+
+            // Get current position
+            const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High
+            });
+
+            // Reverse geocode to get address
+            const addressData = await Location.reverseGeocodeAsync({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude
+            });
+
+            if (addressData[0]) {
+                const addr = addressData[0];
+                // Format the address nicely
+                const parts = [
+                    addr.name,
+                    addr.street,
+                    addr.city,
+                    addr.region,
+                    addr.postalCode,
+                    addr.country
+                ].filter(Boolean); // Remove null/undefined values
+
+                setDeliveryAddress(parts.join(', '));
+            } else {
+                Alert.alert('Error', 'Could not determine your address. Please enter manually.');
+            }
+        } catch (error) {
+            console.error('Error getting location:', error);
+            Alert.alert(
+                'Location Error',
+                'Unable to get your location. Please enter your address manually.'
+            );
+        } finally {
+            setLocationLoading(false);
+        }
+    };
 
     const handleOrderNow = () => {
         if (items.length === 0) {
@@ -152,35 +206,6 @@ const Cart = () => {
         }
     };
 
-    // Debug function to test connection
-    const handleDebugTest = async () => {
-        try {
-            console.log("🧪 ========== DEBUG TEST STARTED ==========");
-
-            const user = await getCurrentUser();
-            console.log("🧪 Current user:", {
-                id: user.$id,
-                accountId: user.accountId,
-                name: user.name,
-                email: user.email
-            });
-
-            console.log("🧪 Cart items:", items.length);
-            if (items.length > 0) {
-                console.log("🧪 First item restaurant ID:", items[0]?.restaurantId);
-                console.log("🧪 First item full data:", JSON.stringify(items[0], null, 2));
-            } else {
-                console.log("🧪 Cart is empty");
-            }
-
-            console.log("🧪 ========== DEBUG TEST COMPLETED ==========");
-            Alert.alert("Debug Info", "Check console logs for details");
-        } catch (e) {
-            console.error("🧪 TEST ERROR:", e);
-            Alert.alert("Debug Error", (e as Error).message);
-        }
-    };
-
     return (
         <SafeAreaView className="bg-white h-full">
             <FlatList
@@ -225,16 +250,6 @@ const Cart = () => {
                             />
                         </View>
 
-                        {/* DEBUG BUTTON - Remove after testing */}
-                        <Pressable
-                            onPress={handleDebugTest}
-                            className="bg-purple-500 p-4 rounded-xl"
-                        >
-                            <Text className="text-white text-center font-bold">
-                                🧪 Debug Test (Check Console)
-                            </Text>
-                        </Pressable>
-
                         <CustomButton
                             title="Order Now"
                             onPress={handleOrderNow}
@@ -270,9 +285,25 @@ const Cart = () => {
                                 </View>
 
                                 <View>
-                                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                                        Delivery Address *
-                                    </Text>
+                                    <View className="flex-row justify-between items-center mb-2">
+                                        <Text className="text-sm font-semibold text-gray-700">
+                                            Delivery Address *
+                                        </Text>
+                                        <TouchableOpacity
+                                            onPress={getCurrentAddress}
+                                            disabled={locationLoading}
+                                            className="flex-row items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg"
+                                        >
+                                            {locationLoading ? (
+                                                <ActivityIndicator size="small" color="#3b82f6" />
+                                            ) : (
+                                                <>
+                                                    <Ionicons name="location" size={16} color="#3b82f6" />
+                                                    <Text className="text-blue-500 text-xs font-medium">Use Current</Text>
+                                                </>
+                                            )}
+                                        </TouchableOpacity>
+                                    </View>
                                     <TextInput
                                         placeholder="Enter your full delivery address"
                                         value={deliveryAddress}

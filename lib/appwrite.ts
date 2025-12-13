@@ -24,6 +24,16 @@ export const databases = new Databases(client);
 export const storage = new Storage(client);
 export const avatars = new Avatars(client);
 
+// ✅ HELPER: Safely log errors without causing _toString issues
+const logError = (context: string, error: any) => {
+    console.error(`❌ ${context}:`, {
+        message: error?.message || 'Unknown error',
+        code: error?.code,
+        type: error?.type,
+        status: error?.status,
+    });
+};
+
 // ---------------- CREATE USER ----------------
 export const createUser = async ({ email, password, name, role = "customer" }: any) => {
     try {
@@ -47,7 +57,7 @@ export const createUser = async ({ email, password, name, role = "customer" }: a
             }
         );
     } catch (e) {
-        console.error("Create user error:", e);
+        logError("Create user error", e);
         throw e;
     }
 };
@@ -57,12 +67,12 @@ export const createRestaurant = async ({
                                            ownerId,
                                            name,
                                            description,
-                                           photo, // <-- NEW FIELD
+                                           photo,
                                        }: {
     ownerId: string;
     name: string;
     description: string;
-    photo: string;     // <-- must be string (URL from upload)
+    photo: string;
 }) => {
     try {
         return await databases.createDocument(
@@ -73,11 +83,11 @@ export const createRestaurant = async ({
                 ownerId,
                 name,
                 description,
-                photo, // <-- store photo URL here
+                photo,
             }
         );
     } catch (e) {
-        console.error("Create restaurant error:", e);
+        logError("Create restaurant error", e);
         throw e;
     }
 };
@@ -90,18 +100,15 @@ export const getRestaurants = async () => {
             appwriteConfig.restaurantCollectionId
         );
 
-        // Map documents to include photo URL
         return res.documents.map(doc => ({
             ...doc,
-            photoUrl: doc.photo, // <-- use the 'photo' field directly
+            photoUrl: doc.photo,
         }));
     } catch (e) {
-        console.error("Get restaurants error:", e);
+        logError("Get restaurants error", e);
         return [];
     }
 };
-
-
 
 // ---------------- CREATE CATEGORY ----------------
 export const createCategory = async ({
@@ -125,7 +132,7 @@ export const createCategory = async ({
             }
         );
     } catch (e) {
-        console.error("Create category error:", e);
+        logError("Create category error", e);
         throw e;
     }
 };
@@ -135,7 +142,7 @@ export const signIn = async ({ email, password }: SignInParams) => {
     try {
         return await account.createEmailPasswordSession(email, password);
     } catch (e) {
-        console.error("Sign-in error:", e);
+        logError("Sign-in error", e);
         throw e;
     }
 };
@@ -145,7 +152,7 @@ export const getCurrentUser = async () => {
     try {
         console.log("🟢 getCurrentUser called");
         const currentAccount = await account.get();
-        console.log("🟢 Current Appwrite account:", currentAccount);
+        console.log("🟢 Current Appwrite account ID:", currentAccount.$id);
         if (!currentAccount) throw new Error("No account found");
 
         const currentUser = await databases.listDocuments(
@@ -154,21 +161,21 @@ export const getCurrentUser = async () => {
             [Query.equal("accountId", currentAccount.$id)]
         );
 
-        console.log("🟢 Current user document:", currentUser.documents[0]);
+        console.log("🟢 Found user documents:", currentUser.documents.length);
         return currentUser.documents[0];
     } catch (e) {
-        console.error("❌ Get current user error:", e);
+        // ✅ FIX: This was causing the _toString error
+        logError("Get current user error", e);
         throw e;
     }
 };
-
 
 // ---------------- LOGOUT ----------------
 export const logout = async () => {
     try {
         await account.deleteSession("current");
     } catch (e) {
-        console.error("Logout error:", e);
+        logError("Logout error", e);
         throw e;
     }
 };
@@ -183,7 +190,7 @@ export const updateUser = async (userId: string, data: any) => {
             data
         );
     } catch (e) {
-        console.error("Update user error:", e);
+        logError("Update user error", e);
         throw e;
     }
 };
@@ -210,9 +217,6 @@ export const getMenu = async ({ category, query, limit }: GetMenuParams & { limi
             console.log("🔍 Searching for:", query);
         }
 
-        console.log("🔍 Database ID:", appwriteConfig.databaseId);
-        console.log("🔍 Collection ID:", appwriteConfig.menuCollectionId);
-
         const menus = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.menuCollectionId,
@@ -221,33 +225,25 @@ export const getMenu = async ({ category, query, limit }: GetMenuParams & { limi
 
         console.log("✅ Menu items fetched:", menus.documents.length);
 
-        // ⚠️ CRITICAL: Check if restaurantId exists in menu items
         if (menus.documents.length > 0) {
             const firstItem = menus.documents[0];
             console.log("📋 First menu item structure:", {
                 id: firstItem.$id,
                 name: firstItem.name,
-                restaurantId: firstItem.restaurantId, // ⚠️ CHECK THIS!
+                restaurantId: firstItem.restaurantId,
                 categories: firstItem.categories,
                 price: firstItem.price
             });
 
             if (!firstItem.restaurantId) {
-                console.error("❌ ========== CRITICAL ERROR ==========");
                 console.error("❌ Menu items are missing 'restaurantId' field!");
-                console.error("❌ This is why orders show 'unknown' restaurant!");
-                console.error("❌ Fix: Add 'restaurantId' attribute to menu_items collection in Appwrite");
-                console.error("❌ Then update existing menu items to include restaurantId");
-                console.error("❌ =====================================");
-            } else {
-                console.log("✅ restaurantId found:", firstItem.restaurantId);
             }
         }
 
         console.log("🔍 ========== GET MENU COMPLETED ==========");
         return menus.documents;
     } catch (e) {
-        console.error("❌ getMenu error:", e);
+        logError("getMenu error", e);
         throw new Error(e as string);
     }
 };
@@ -265,6 +261,7 @@ export const getCategories = async () => {
         throw new Error(e as string);
     }
 };
+
 // ---------------- GET RESTAURANT BY OWNER ----------------
 export const getRestaurantByOwner = async (ownerId: string) => {
     try {
@@ -275,7 +272,7 @@ export const getRestaurantByOwner = async (ownerId: string) => {
         );
         return result.documents[0] || null;
     } catch (e) {
-        console.error("Get restaurant error:", e);
+        logError("Get restaurant error", e);
         throw e;
     }
 };
@@ -294,7 +291,7 @@ export const updateOrderStatus = async (
             { status, ...additionalData }
         );
     } catch (e) {
-        console.error("Update order status error:", e);
+        logError("Update order status error", e);
         throw e;
     }
 };
@@ -313,11 +310,10 @@ export const getRestaurantOrders = async (restaurantId: string) => {
         );
         return result.documents;
     } catch (e) {
-        console.error("Get restaurant orders error:", e);
+        logError("Get restaurant orders error", e);
         throw e;
     }
 };
-// Add these functions to your existing lib/appwrite.ts file
 
 // ---------------- GET AVAILABLE ORDERS (for drivers) ----------------
 export const getAvailableOrders = async () => {
@@ -334,7 +330,7 @@ export const getAvailableOrders = async () => {
         );
         return result.documents;
     } catch (e) {
-        console.error("Get available orders error:", e);
+        logError("Get available orders error", e);
         throw e;
     }
 };
@@ -359,7 +355,7 @@ export const getDriverDeliveries = async (driverId: string, includeCompleted = f
         );
         return result.documents;
     } catch (e) {
-        console.error("Get driver deliveries error:", e);
+        logError("Get driver deliveries error", e);
         throw e;
     }
 };
@@ -379,7 +375,7 @@ export const getDriverHistory = async (driverId: string) => {
         );
         return result.documents;
     } catch (e) {
-        console.error("Get driver history error:", e);
+        logError("Get driver history error", e);
         throw e;
     }
 };
@@ -398,7 +394,7 @@ export const acceptDelivery = async (orderId: string, driverId: string) => {
             }
         );
     } catch (e) {
-        console.error("Accept delivery error:", e);
+        logError("Accept delivery error", e);
         throw e;
     }
 };
@@ -416,7 +412,7 @@ export const markAsDelivered = async (orderId: string) => {
             }
         );
     } catch (e) {
-        console.error("Mark as delivered error:", e);
+        logError("Mark as delivered error", e);
         throw e;
     }
 };
@@ -424,23 +420,19 @@ export const markAsDelivered = async (orderId: string) => {
 // ---------------- GET DRIVER STATS ----------------
 export const getDriverStats = async (driverId: string) => {
     try {
-        // Get all completed deliveries
         const allDeliveries = await getDriverHistory(driverId);
 
-        // Get today's deliveries
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayDeliveries = allDeliveries.filter((d: any) =>
             new Date(d.deliveredAt) >= today
         );
 
-        // Get this week's deliveries
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         const weekDeliveries = allDeliveries.filter((d: any) =>
             new Date(d.deliveredAt) >= weekAgo
         );
 
-        // Calculate earnings (assuming $5 per delivery or use deliveryFee field if available)
         const todayEarnings = todayDeliveries.length * 5;
         const weekEarnings = weekDeliveries.length * 5;
         const totalEarnings = allDeliveries.length * 5;
@@ -460,7 +452,7 @@ export const getDriverStats = async (driverId: string) => {
             },
         };
     } catch (e) {
-        console.error("Get driver stats error:", e);
+        logError("Get driver stats error", e);
         throw e;
     }
 };

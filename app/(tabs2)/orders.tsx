@@ -13,14 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Query, Models } from "react-native-appwrite";
 import { appwriteConfig, databases, getCurrentUser } from "@/lib/appwrite";
-import Animated, {
-    FadeInUp,
-    FadeInDown,
-    FadeIn,
-    SlideInUp,
-    SlideInDown,
-    withDelay,
-} from "react-native-reanimated";
+// ❌ REMOVED: Animated imports - testing if this causes the issue
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface OrderItem {
@@ -60,6 +53,10 @@ const STATUS_CONFIG = {
     out_for_delivery: { label: "OUT FOR DELIVERY", color: "#3B82F6", bgColor: "#DBEAFE", icon: "bicycle" },
     delivered: { label: "DELIVERED", color: "#6B7280", bgColor: "#F3F4F6", icon: "checkmark-done-circle" },
     cancelled: { label: "CANCELLED", color: "#DC2626", bgColor: "#FEE2E2", icon: "close-circle" },
+};
+
+const logError = (context: string, error: any) => {
+    console.error(`${context}:`, error?.message || String(error));
 };
 
 export default function OrdersManagement() {
@@ -103,7 +100,7 @@ export default function OrdersManagement() {
             setOrders(ordersList);
             filterOrders(ordersList, selectedFilter);
         } catch (err) {
-            console.error(err);
+            logError("Load orders error", err);
             Alert.alert("Error", (err as Error).message);
         } finally {
             setLoading(false);
@@ -145,7 +142,7 @@ export default function OrdersManagement() {
             loadOrders();
             setDetailsModalVisible(false);
         } catch (err) {
-            console.error(err);
+            logError("Update order status error", err);
             Alert.alert("Error", (err as Error).message);
         }
     };
@@ -299,10 +296,8 @@ export default function OrdersManagement() {
                             });
 
                             return (
-                                <Animated.View
-                                    entering={FadeInUp.duration(500).delay(index * 50)}
-                                    className="mb-4"
-                                >
+                                // ✅ CHANGED: Removed Animated.View, using plain View
+                                <View className="mb-4">
                                     <Pressable
                                         onPress={() => showOrderDetails(item)}
                                         className="bg-white rounded-2xl overflow-hidden"
@@ -314,7 +309,7 @@ export default function OrdersManagement() {
                                             elevation: 8,
                                         }}
                                     >
-                                        {/* Ticket Punch Holes */}
+                                        {/* All your existing order card content... */}
                                         <View className="absolute top-0 left-0 right-0 flex-row justify-between px-4 z-10">
                                             {[...Array(8)].map((_, i) => (
                                                 <View
@@ -324,7 +319,6 @@ export default function OrdersManagement() {
                                             ))}
                                         </View>
 
-                                        {/* Status Banner */}
                                         <View
                                             className="py-3 items-center border-b-2 border-dashed border-gray-300"
                                             style={{ backgroundColor: statusConfig.bgColor }}
@@ -337,7 +331,6 @@ export default function OrdersManagement() {
                                             </Text>
                                         </View>
 
-                                        {/* Ticket Header */}
                                         <View className="px-6 py-4 border-b-2 border-dashed border-gray-300">
                                             <View className="flex-row justify-between items-start mb-2">
                                                 <View>
@@ -360,7 +353,6 @@ export default function OrdersManagement() {
                                                 </View>
                                             </View>
 
-                                            {/* Customer Info */}
                                             <View className="bg-gray-50 rounded-lg px-3 py-2 mt-2">
                                                 <View className="flex-row items-center">
                                                     <Ionicons name="person" size={14} color="#6b7280" />
@@ -379,7 +371,6 @@ export default function OrdersManagement() {
                                             </View>
                                         </View>
 
-                                        {/* Order Items */}
                                         <View className="px-6 py-4 bg-amber-50">
                                             <Text className="text-xs font-black text-gray-500 mb-3 tracking-wider">
                                                 ORDER DETAILS
@@ -417,7 +408,6 @@ export default function OrdersManagement() {
                                             ))}
                                         </View>
 
-                                        {/* Delivery Address */}
                                         {item.deliveryAddress && (
                                             <View className="px-6 py-3 bg-gray-50 border-t-2 border-dashed border-gray-300">
                                                 <View className="flex-row items-start">
@@ -439,7 +429,6 @@ export default function OrdersManagement() {
                                             </View>
                                         )}
 
-                                        {/* Action Buttons */}
                                         {getStatusActions(item.status).length > 0 && (
                                             <View className="flex-row border-t-2 border-dashed border-gray-300">
                                                 {getStatusActions(item.status).map((action, idx) => (
@@ -474,7 +463,6 @@ export default function OrdersManagement() {
                                             </View>
                                         )}
 
-                                        {/* Bottom Punch Holes */}
                                         <View className="absolute bottom-0 left-0 right-0 flex-row justify-between px-4 z-10">
                                             {[...Array(8)].map((_, i) => (
                                                 <View
@@ -484,7 +472,7 @@ export default function OrdersManagement() {
                                             ))}
                                         </View>
                                     </Pressable>
-                                </Animated.View>
+                                </View>
                             );
                         }}
                     />

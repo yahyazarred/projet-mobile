@@ -26,20 +26,27 @@ const useAppwrite = <T, P = void>({
                 const result = await fn(overrideParams ?? params!);
                 setData(result);
             } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : "Unknown error";
+                const message = err instanceof Error ? err.message : String(err);
                 setError(message);
-                Alert.alert("Error", message);
+
+                // ✅ Only show alert for non-auth errors
+                // Don't show alert for "missing scopes" or "unauthorized" errors
+                const errorMsg = message.toLowerCase();
+                if (!errorMsg.includes('scope') && !errorMsg.includes('unauthorized') && !errorMsg.includes('guest')) {
+                    Alert.alert("Error", message);
+                }
             } finally {
                 setLoading(false);
             }
         },
-        [fn] // removed 'params' here
+        [fn, params] // Keep params in deps to avoid stale closure
     );
 
     useEffect(() => {
         if (!skip) {
             fetchData().catch((err) => {
-                console.error("Fetch error:", err);
+                // ✅ FIX: Safely log error without causing _toString
+                console.error("Fetch error:", err?.message || String(err));
             });
         }
     }, [fetchData, skip]);

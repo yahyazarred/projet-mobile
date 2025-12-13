@@ -1,5 +1,6 @@
 {
   "expo": {
+    "jsEngine": "jsc",
     "name": "fast_food",
     "slug": "fast_food",
     "version": "1.0.0",
