@@ -1,3 +1,4 @@
+// ==================== IMPORTS ====================
 import {
     View,
     Text,
@@ -9,22 +10,28 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import useAppwrite from "@/lib/useAppwrite";
+import useAppwrite from "@/lib/useAppwrite";  // Custom hook for data fetching
 import { getCurrentUser, updateUser, logout, account } from "@/lib/appwrite";
 import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import LottieView from "lottie-react-native";
 
-
+// ==================== PROFILE COMPONENT ====================
 const Profile = () => {
+    // ==================== DATA FETCHING ====================
+    // useAppwrite: Custom hook that handles loading, error, and data states
+    // Returns: { data, loading, refetch }
     const { data: user, loading, refetch } = useAppwrite({ fn: getCurrentUser });
 
-    const [isEditing, setIsEditing] = useState(false);
+    // ==================== STATE ====================
+    const [isEditing, setIsEditing] = useState(false);  // Edit mode toggle
     const [form, setForm] = useState({
         name: "",
         email: "",
     });
 
+    // ==================== SYNC FORM WITH USER DATA ====================
+    // When user data loads, populate the form
     useEffect(() => {
         if (user) {
             setForm({
@@ -32,19 +39,24 @@ const Profile = () => {
                 email: user.email || "",
             });
         }
-    }, [user]);
+    }, [user]);  // Runs when user changes
 
+    // ==================== SAVE PROFILE CHANGES ====================
     const saveChanges = async () => {
         if (!user) return;
 
         try {
+            // Only update if name changed (prevents unnecessary API calls)
             if (form.name !== user.name) {
+                // Update in Appwrite auth system
                 await account.updateName(form.name);
+                // Update in our database
                 await updateUser(user.$id, { name: form.name });
             }
 
+            // Refresh user data from server
             await refetch();
-            setIsEditing(false);
+            setIsEditing(false);  // Exit edit mode
             alert("Profile updated successfully!");
         } catch (error: any) {
             console.error("Update error:", error);
@@ -52,6 +64,7 @@ const Profile = () => {
         }
     };
 
+    // ==================== LOADING STATE ====================
     if (loading) {
         return (
             <SafeAreaView className="flex-1 justify-center items-center bg-white">
@@ -60,6 +73,7 @@ const Profile = () => {
         );
     }
 
+    // ==================== NO USER STATE ====================
     if (!user) {
         return (
             <SafeAreaView className="flex-1 justify-center items-center bg-white">
@@ -68,35 +82,35 @@ const Profile = () => {
         );
     }
 
+    // ==================== RENDER PROFILE ====================
     return (
         <SafeAreaView className="flex-1 bg-amber-50">
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 className="flex-1"
             >
-                {/* Header with mustard gradient */}
+                {/* ==================== HEADER WITH ANIMATION ==================== */}
                 <View className="relative h-56 rounded-b-[30px] overflow-hidden">
 
-                    {/* Lottie Background Animation */}
+                    {/* Background Lottie Animation */}
                     <LottieView
                         source={require("@/assets/animations/Fast Food.json")}
                         autoPlay
-
                         loop
                         resizeMode="cover"
                         style={{
                             position: "absolute",
                             top: 0,
-                            bottom:0,
+                            bottom: 0,
                             left: 0,
                             right: 0,
                             width: "100%",
                             height: "70%",
-                            zIndex: -1,
+                            zIndex: -1,  // Behind other content
                         }}
                     />
 
-                    {/* Content inside header */}
+                    {/* Header content on top of animation */}
                     <View className="pt-4 px-5">
                         <View className="flex-row justify-between items-center mb-8">
                             <Text className="text-2xl font-bold text-white">My Profile</Text>
@@ -104,23 +118,24 @@ const Profile = () => {
                                 <Ionicons name="notifications-outline" size={24} color="#fff" />
                             </TouchableOpacity>
                         </View>
-
-
                     </View>
                 </View>
-                {/* Floating Profile Picture */}
+
+                {/* ==================== FLOATING PROFILE PICTURE ==================== */}
+                {/* Positioned to overlap header (negative margin) */}
                 <View className="items-center">
                     <View
                         className="relative bg-white rounded-full"
                         style={{
-                            marginTop: -24,
-                            zIndex: 10,
-                            width: 110,   // same as w-32
-                            height: 110,  // same as h-32
+                            marginTop: -24,  // Pulls up to overlap header
+                            zIndex: 10,      // Appears above header
+                            width: 110,
+                            height: 110,
                             justifyContent: "center",
                             alignItems: "center",
                         }}
                     >
+                        {/* Show avatar if exists, otherwise show initial letter */}
                         {user.avatar ? (
                             <Image
                                 source={{ uri: user.avatar }}
@@ -128,11 +143,13 @@ const Profile = () => {
                                 resizeMode="cover"
                             />
                         ) : (
+                            // Fallback: First letter of name
                             <Text className="text-4xl font-bold text-gray-700">
                                 {user.name?.charAt(0).toUpperCase()}
                             </Text>
                         )}
 
+                        {/* Camera icon button (bottom-right of profile pic) */}
                         <TouchableOpacity
                             className="absolute bottom-0 right-0 bg-amber-500 p-2 rounded-full border-4 border-white"
                             activeOpacity={0.7}
@@ -142,16 +159,14 @@ const Profile = () => {
                     </View>
                 </View>
 
-
-
-
-
-                {/* Content */}
+                {/* ==================== CONTENT SECTION ==================== */}
                 <View className="px-5 pt-10 pb-8">
-                    {/* User Stats */}
+
+                    {/* ==================== USER STATS CARD ==================== */}
+                    {/* Displays orders, favorites, reviews with Lottie icons */}
                     <View className="bg-white rounded-2xl p-4 shadow-sm mb-6 flex-row justify-around">
+                        {/* Orders stat */}
                         <View className="items-center">
-                            {/* Lottie Animation */}
                             <LottieView
                                 source={require('@/assets/animations/Confirming Order.json')}
                                 autoPlay
@@ -161,11 +176,15 @@ const Profile = () => {
                             <Text className="text-2xl font-bold text-black">24</Text>
                             <Text className="text-xs text-gray-600 mt-1">Orders</Text>
                         </View>
+
+                        {/* Vertical divider */}
                         <View className="w-px bg-amber-500" />
+
+                        {/* Favorites stat */}
                         <View className="items-center">
                             <LottieView
                                 source={require('@/assets/animations/like.json')}
-                                speed={0.5} // slower
+                                speed={0.5}  // Slower animation
                                 autoPlay
                                 loop
                                 style={{ width: 50, height: 50 }}
@@ -173,7 +192,10 @@ const Profile = () => {
                             <Text className="text-2xl font-bold text-black">12</Text>
                             <Text className="text-xs text-gray-600 mt-1">Favorites</Text>
                         </View>
+
                         <View className="w-px bg-amber-500" />
+
+                        {/* Reviews stat */}
                         <View className="items-center">
                             <LottieView
                                 source={require('@/assets/animations/Winner.json')}
@@ -186,17 +208,17 @@ const Profile = () => {
                         </View>
                     </View>
 
-
-                    {/* Profile Information */}
+                    {/* ==================== PROFILE INFORMATION CARD ==================== */}
                     <View className="bg-white rounded-2xl p-5 shadow-md mb-6">
                         <Text className="text-lg font-bold text-black mb-4 text-center">
                             Profile Information
                         </Text>
 
-                        {/* Name Field */}
+                        {/* Name Field (editable when isEditing = true) */}
                         <View className="mb-4">
                             <Text className="text-xs text-gray-600 mb-2">Full Name</Text>
                             {isEditing ? (
+                                // Edit mode: Show TextInput
                                 <View className="flex-row items-center bg-amber-100 rounded-xl px-4 py-3 border border-amber-500">
                                     <Ionicons name="person-outline" size={20} color="#B91C1C" />
                                     <TextInput
@@ -208,6 +230,7 @@ const Profile = () => {
                                     />
                                 </View>
                             ) : (
+                                // View mode: Show static text
                                 <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-500">
                                     <Ionicons name="person-outline" size={20} color="#F59E0B" />
                                     <Text className="ml-3 text-gray-900 text-base font-medium">
@@ -217,7 +240,7 @@ const Profile = () => {
                             )}
                         </View>
 
-                        {/* Email Field */}
+                        {/* Email Field (read-only, cannot be edited) */}
                         <View className="mb-4">
                             <Text className="text-xs text-gray-600 mb-2">Email Address</Text>
                             <View className="flex-row items-center bg-amber-50 rounded-xl px-4 py-3 border border-amber-500">
@@ -228,7 +251,7 @@ const Profile = () => {
                             </View>
                         </View>
 
-                        {/* Role Badge */}
+                        {/* Role Badge (customer/driver/owner) */}
                         <View className="flex-row items-center bg-red-700 rounded-xl px-4 py-3">
                             <Ionicons name="shield-checkmark" size={20} color="white" />
                             <Text className="ml-3 text-white text-base font-medium capitalize">
@@ -237,10 +260,10 @@ const Profile = () => {
                         </View>
                     </View>
 
-
-                    {/* Action Buttons */}
+                    {/* ==================== ACTION BUTTONS ==================== */}
                     <View className="space-y-3">
                         {isEditing ? (
+                            // Edit mode: Show Save and Cancel buttons
                             <>
                                 <TouchableOpacity
                                     className="bg-red-700 rounded-xl p-4 shadow-sm mb-3"
@@ -254,10 +277,12 @@ const Profile = () => {
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     className="bg-gray-200 rounded-xl p-4"
                                     onPress={() => {
                                         setIsEditing(false);
+                                        // Reset form to original user data
                                         setForm({
                                             name: user.name || "",
                                             email: user.email || "",
@@ -274,6 +299,7 @@ const Profile = () => {
                                 </TouchableOpacity>
                             </>
                         ) : (
+                            // View mode: Show Edit Profile button
                             <>
                                 <TouchableOpacity
                                     className="bg-amber-500 rounded-xl p-4 shadow-sm mb-3"
@@ -287,13 +313,13 @@ const Profile = () => {
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
-
                             </>
                         )}
                     </View>
 
-                    {/* Quick Actions */}
+                    {/* ==================== QUICK ACTIONS MENU ==================== */}
                     <View className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
+                        {/* Favorites */}
                         <TouchableOpacity
                             className="flex-row items-center p-4 border-b border-amber-100"
                             activeOpacity={0.7}
@@ -307,6 +333,7 @@ const Profile = () => {
                             <Ionicons name="chevron-forward" size={20} color="#F59E0B" />
                         </TouchableOpacity>
 
+                        {/* Order History */}
                         <TouchableOpacity
                             className="flex-row items-center p-4 border-b border-amber-100"
                             activeOpacity={0.7}
@@ -320,6 +347,7 @@ const Profile = () => {
                             <Ionicons name="chevron-forward" size={20} color="#F59E0B" />
                         </TouchableOpacity>
 
+                        {/* Settings */}
                         <TouchableOpacity
                             className="flex-row items-center p-4"
                             activeOpacity={0.7}
@@ -333,6 +361,8 @@ const Profile = () => {
                             <Ionicons name="chevron-forward" size={20} color="#F59E0B" />
                         </TouchableOpacity>
                     </View>
+
+                    {/* ==================== LOGOUT BUTTON ==================== */}
                     <TouchableOpacity
                         className="bg-amber-500 rounded-xl p-4 shadow-sm mt-5 mb-5"
                         onPress={async () => {

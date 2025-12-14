@@ -6,17 +6,50 @@
   <component name="ChangeListManager">
     <list default="true" id="25556cee-f7b2-4b2a-867e-358e6ab1b6f9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/owner-sign-in.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/owner-sign-in.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(auth)/sign-in.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/sign-in.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/sign-up-driver.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/sign-up-driver.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(auth)/sign-up.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(auth)/sign-up.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(signup-choice)/sign-up-choice.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(signup-choice)/sign-up-choice.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/_layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(tabs)/cart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/cart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/map.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/search.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs2)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs2)/menu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/menu.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(tabs2)/orders.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/orders.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(tabs2)/restaurant-profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs2)/restaurant-profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs3)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs3)/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs3)/deliveries.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs3)/deliveries.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/(tabs3)/driver-profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs3)/driver-profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs3)/history.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/readme/hero.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/readme/jsmpro.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/readme/videokit.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/CartButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CartButton.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/CartItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CartItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/CustomButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CustomButton.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/CustomHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CustomHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/CustomInput.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CustomInput.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Filter.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Filter.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/MenuCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MenuCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/MenuFormModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MenuFormModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/MenuItemCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MenuItemCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/SearchBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/SearchBar.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/appwrite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/appwrite.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/imageService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/imageService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/menuService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/menuService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/menuTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/menuTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/orderService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/orderService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/seed.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/useAppwrite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/useAppwrite.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/useMenuItems.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/useMenuItems.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/store/auth.store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store/auth.store.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/cart.store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store/cart.store.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +90,7 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;try2&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;try3&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/missb/WebstormProjects/projet-mobile/assets&quot;,
@@ -138,7 +171,10 @@
       <workItem from="1763294554576" duration="7129000" />
       <workItem from="1763406281105" duration="8711000" />
       <workItem from="1765187650003" duration="949000" />
-      <workItem from="1765628647449" duration="10045000" />
+      <workItem from="1765628647449" duration="12383000" />
+      <workItem from="1765656777193" duration="6898000" />
+      <workItem from="1765699605293" duration="6579000" />
+      <workItem from="1765733220432" duration="9027000" />
     </task>
     <servers />
   </component>
@@ -150,7 +186,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/lib/seed.ts</url>
-          <line>35</line>
+          <line>75</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

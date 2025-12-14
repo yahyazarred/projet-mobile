@@ -1,4 +1,12 @@
 // components/MenuFormModal.tsx
+
+/**
+ * MenuFormModal Component
+ *
+ * Complex modal for creating/editing menu items with nested category creation.
+ * Used by restaurant owners to manage their menu.
+ */
+
 import { useState } from "react";
 import {
     View,
@@ -15,19 +23,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Category, MenuFormData } from "@/lib/menuTypes";
 
-
+// Props interface defines all required data and callbacks
 interface MenuFormModalProps {
-    visible: boolean;
-    editMode: boolean;
-    formData: MenuFormData;
-    categories: Category[];
-    loading: boolean;
+    visible: boolean;           // Controls modal visibility
+    editMode: boolean;          // true = editing, false = creating
+    formData: MenuFormData;     // Current form values
+    categories: Category[];     // Available categories
+    loading: boolean;           // Save operation in progress
     currentRestaurantId: string;
     onClose: () => void;
     onSave: () => void;
     onPickImage: () => void;
     onFormChange: (field: keyof MenuFormData, value: string) => void;
-    onCategoryCreated: () => void;
+    onCategoryCreated: () => void;  // Callback to refresh categories
 }
 
 export const MenuFormModal = ({
@@ -43,11 +51,22 @@ export const MenuFormModal = ({
                                   onFormChange,
                                   onCategoryCreated,
                               }: MenuFormModalProps) => {
+    // =====================================================
+    // LOCAL STATE - CATEGORY CREATION
+    // =====================================================
+
+    // Controls nested category creation modal
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
     const [newCategoryDescription, setNewCategoryDescription] = useState("");
     const [creatingCategory, setCreatingCategory] = useState(false);
 
+    /**
+     * Create New Category
+     *
+     * Dynamic import used to avoid circular dependencies.
+     * Called from nested modal when user creates a new category.
+     */
     const handleCreateCategory = async () => {
         if (!newCategoryName.trim()) {
             return Alert.alert("Error", "Please enter a category name");
@@ -55,6 +74,7 @@ export const MenuFormModal = ({
 
         try {
             setCreatingCategory(true);
+            // Dynamic import - only loads when needed
             const { createCategory } = await import("@/lib/appwrite");
 
             await createCategory({
@@ -63,9 +83,12 @@ export const MenuFormModal = ({
                 restaurantId: currentRestaurantId,
             });
 
+            // Reset form and close modal
             setNewCategoryName("");
             setNewCategoryDescription("");
             setShowCategoryModal(false);
+
+            // Notify parent to refresh category list
             onCategoryCreated();
             Alert.alert("Success", "Category created successfully!");
         } catch (err) {
@@ -78,21 +101,27 @@ export const MenuFormModal = ({
 
     return (
         <>
-            {/* Main Menu Item Form Modal */}
+            {/* =====================================================
+                MAIN MENU ITEM FORM MODAL
+                ===================================================== */}
+
             <Modal
                 visible={visible}
                 animationType="slide"
                 transparent={true}
                 onRequestClose={onClose}
             >
+                {/* Dark overlay background */}
                 <View className="flex-1 bg-black/60">
                     <View className="flex-1 mt-20">
+                        {/* Gradient background for recipe card aesthetic */}
                         <LinearGradient
                             colors={['#fff7ed', '#fef3c7', '#fde68a']}
                             className="flex-1 rounded-t-[40px] overflow-hidden"
                         >
-                            {/* Recipe Card Header */}
+                            {/* Header Section */}
                             <View className="bg-orange-500 px-6 py-6 relative">
+                                {/* Decorative corner triangle */}
                                 <View className="absolute top-0 right-0 w-24 h-24">
                                     <View className="absolute top-0 right-0 w-0 h-0 border-t-[90px] border-r-[90px] border-t-orange-600 border-r-transparent opacity-50" />
                                 </View>
@@ -112,6 +141,8 @@ export const MenuFormModal = ({
                                             Craft your signature creation
                                         </Text>
                                     </View>
+
+                                    {/* Close button */}
                                     <Pressable
                                         onPress={onClose}
                                         className="bg-white/20 w-10 h-10 rounded-full items-center justify-center active:scale-95"
@@ -123,7 +154,10 @@ export const MenuFormModal = ({
 
                             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                                 <View className="p-6 space-y-5">
-                                    {/* Image Upload Section */}
+                                    {/* =====================================================
+                                        IMAGE UPLOAD SECTION
+                                        ===================================================== */}
+
                                     <View>
                                         <Text className="text-gray-900 text-sm font-bold mb-3 uppercase tracking-wide">
                                             📸 Dish Photo
@@ -140,6 +174,7 @@ export const MenuFormModal = ({
                                             }}
                                         >
                                             {formData.imageUri ? (
+                                                // Show selected image with overlay
                                                 <View className="relative">
                                                     <Image
                                                         source={{ uri: formData.imageUri }}
@@ -154,6 +189,7 @@ export const MenuFormModal = ({
                                                     </View>
                                                 </View>
                                             ) : (
+                                                // Empty state - prompt to add image
                                                 <View className="h-48 items-center justify-center">
                                                     <View className="bg-orange-100 rounded-full p-4 mb-3">
                                                         <Ionicons name="camera" size={40} color="#f97316" />
@@ -165,7 +201,7 @@ export const MenuFormModal = ({
                                         </Pressable>
                                     </View>
 
-                                    {/* Dish Name */}
+                                    {/* Dish Name Input */}
                                     <View>
                                         <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
                                             🍽️ Dish Name
@@ -181,7 +217,7 @@ export const MenuFormModal = ({
                                         </View>
                                     </View>
 
-                                    {/* Description */}
+                                    {/* Description Input - multiline */}
                                     <View>
                                         <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
                                             📝 Description
@@ -200,7 +236,7 @@ export const MenuFormModal = ({
                                         </View>
                                     </View>
 
-                                    {/* Price */}
+                                    {/* Price Input with $ prefix */}
                                     <View>
                                         <Text className="text-gray-900 text-sm font-bold mb-2 uppercase tracking-wide">
                                             💰 Price
@@ -218,12 +254,16 @@ export const MenuFormModal = ({
                                         </View>
                                     </View>
 
-                                    {/* Category */}
+                                    {/* =====================================================
+                                        CATEGORY SELECTION
+                                        ===================================================== */}
+
                                     <View>
                                         <View className="flex-row items-center justify-between mb-2">
                                             <Text className="text-gray-900 text-sm font-bold uppercase tracking-wide">
                                                 🏷️ Category
                                             </Text>
+                                            {/* Button to open nested category creation modal */}
                                             <Pressable
                                                 onPress={() => setShowCategoryModal(true)}
                                                 className="active:scale-95"
@@ -234,6 +274,8 @@ export const MenuFormModal = ({
                                                 </View>
                                             </Pressable>
                                         </View>
+
+                                        {/* Horizontal scrollable category chips */}
                                         <ScrollView
                                             horizontal
                                             showsHorizontalScrollIndicator={false}
@@ -245,6 +287,7 @@ export const MenuFormModal = ({
                                                     onPress={() => onFormChange("category", cat.$id)}
                                                     className="active:scale-95"
                                                 >
+                                                    {/* Conditional styling for selected category */}
                                                     <View className={`px-4 py-3 rounded-xl border-2 ${
                                                         formData.category === cat.$id
                                                             ? "bg-orange-500 border-orange-500"
@@ -263,15 +306,19 @@ export const MenuFormModal = ({
                                         </ScrollView>
                                     </View>
 
-                                    {/* Divider */}
                                     <View className="border-t-2 border-dashed border-orange-300 my-2" />
 
-                                    {/* Nutrition Info */}
+                                    {/* =====================================================
+                                        NUTRITION INPUTS
+                                        ===================================================== */}
+
                                     <View>
                                         <Text className="text-gray-900 text-sm font-bold mb-3 uppercase tracking-wide">
                                             ⚡ Nutrition Facts
                                         </Text>
+                                        {/* Two inputs side by side */}
                                         <View className="flex-row gap-3">
+                                            {/* Calories */}
                                             <View className="flex-1">
                                                 <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden">
                                                     <View className="flex-row items-center px-4 py-4">
@@ -287,6 +334,8 @@ export const MenuFormModal = ({
                                                     </View>
                                                 </View>
                                             </View>
+
+                                            {/* Protein */}
                                             <View className="flex-1">
                                                 <View className="bg-white rounded-2xl border-2 border-orange-200 overflow-hidden">
                                                     <View className="flex-row items-center px-4 py-4">
@@ -305,8 +354,12 @@ export const MenuFormModal = ({
                                         </View>
                                     </View>
 
-                                    {/* Action Buttons */}
+                                    {/* =====================================================
+                                        ACTION BUTTONS
+                                        ===================================================== */}
+
                                     <View className="flex-row gap-3 pt-4 pb-6">
+                                        {/* Cancel Button */}
                                         <Pressable
                                             onPress={onClose}
                                             className="flex-1 bg-gray-200 py-4 rounded-2xl active:scale-95"
@@ -315,6 +368,8 @@ export const MenuFormModal = ({
                                                 Cancel
                                             </Text>
                                         </Pressable>
+
+                                        {/* Save Button with loading state */}
                                         <Pressable
                                             onPress={onSave}
                                             disabled={loading}
@@ -352,7 +407,7 @@ export const MenuFormModal = ({
                                 </View>
                             </ScrollView>
 
-                            {/* Scalloped Bottom Edge */}
+                            {/* Decorative scalloped bottom edge */}
                             <View className="h-5 bg-amber-100 flex-row">
                                 {[...Array(12)].map((_, i) => (
                                     <View
@@ -367,7 +422,10 @@ export const MenuFormModal = ({
                 </View>
             </Modal>
 
-            {/* Create Category Mini Modal */}
+            {/* =====================================================
+                NESTED CATEGORY CREATION MODAL
+                ===================================================== */}
+
             <Modal
                 visible={showCategoryModal}
                 animationType="fade"
@@ -453,9 +511,7 @@ export const MenuFormModal = ({
                                         className="py-3 rounded-xl items-center justify-center"
                                     >
                                         {creatingCategory ? (
-                                            <>
-                                                <ActivityIndicator color="white" size="small" />
-                                            </>
+                                            <ActivityIndicator color="white" size="small" />
                                         ) : (
                                             <Text className="text-white font-bold">Create</Text>
                                         )}

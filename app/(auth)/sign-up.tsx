@@ -1,3 +1,4 @@
+// ==================== IMPORTS ====================
 import { View, Text, Alert, KeyboardAvoidingView, Platform, Dimensions, Animated } from "react-native";
 import { Link, router } from "expo-router";
 import CustomInput from "@/components/CustomInput";
@@ -6,8 +7,12 @@ import { useState, useRef, useEffect } from "react";
 import { createUser, logout } from "@/lib/appwrite";
 import LottieView from "lottie-react-native";
 
+
+// ==================== CUSTOMER SIGN-UP COMPONENT ====================
 const SignUp = () => {
+    // Form submission state
     const [isSubmitting, setIsSubmitting] = useState(false);
+//form :an object that stores form data /setForm :update the form
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -15,13 +20,13 @@ const SignUp = () => {
         role: "customer",
     });
 
-    // Animated values for stagger
+    // Animation arrays for 5 form elements
     const animations = useRef([
-        new Animated.Value(50), // Name input
-        new Animated.Value(50), // Email input
-        new Animated.Value(50), // Password input
-        new Animated.Value(50), // Sign Up button
-        new Animated.Value(50), // Return link
+        new Animated.Value(50),
+        new Animated.Value(50),
+        new Animated.Value(50),
+        new Animated.Value(50),
+        new Animated.Value(50),
     ]).current;
 
     const opacityValues = useRef([
@@ -32,6 +37,7 @@ const SignUp = () => {
         new Animated.Value(0),
     ]).current;
 
+    // Staggered entrance animation on mount
     useEffect(() => {
         const animatedSequence = animations.map((anim, i) =>
             Animated.parallel([
@@ -51,9 +57,11 @@ const SignUp = () => {
         Animated.stagger(150, animatedSequence).start();
     }, []);
 
+    // Handle customer account creation
     const submit = async () => {
         const { name, email, password, role } = form;
 
+        // Validate required fields
         if (!name || !email || !password) {
             return Alert.alert("Error", "Please enter valid name, email & password.");
         }
@@ -61,10 +69,17 @@ const SignUp = () => {
         setIsSubmitting(true);
 
         try {
+            // Clear any existing session
             await logout().catch(() => null);
+
+            // Create new customer account
             await createUser({ name, email, password, role });
+
             Alert.alert("Success", "Customer account created!");
+
+            // Navigate to sign-in screen
             router.replace("/sign-in");
+
         } catch (error: any) {
             Alert.alert("Error", error.message);
             console.error("SignUp error:", error);
@@ -73,6 +88,7 @@ const SignUp = () => {
         }
     };
 
+    // Responsive sizing
     const screenHeight = Dimensions.get("screen").height;
     const screenWidth = Dimensions.get("screen").width;
 
@@ -82,7 +98,7 @@ const SignUp = () => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ justifyContent: "center", paddingHorizontal: 16 }}
         >
-            {/* --- TOP LOTTIE ANIMATION --- */}
+            {/* ==================== HEADER ANIMATION ==================== */}
             <View
                 style={{
                     height: screenHeight / 4.5,
@@ -99,14 +115,15 @@ const SignUp = () => {
                     style={{
                         width: screenWidth * 0.75,
                         height: screenHeight / 3.5,
-                        marginLeft: -20,
+                        marginLeft: -20, // Slight offset for visual balance
                     }}
                 />
             </View>
 
-            {/* --- FORM WITH STAGGERED ANIMATION --- */}
+            {/* ==================== SIGN-UP FORM ==================== */}
             <View className="gap-5 bg-amber-50 rounded-lg">
 
+                {/* Name input */}
                 <Animated.View
                     style={{
                         transform: [{ translateY: animations[0] }],
@@ -116,11 +133,11 @@ const SignUp = () => {
                     <CustomInput
                         placeholder="Enter your full name"
                         value={form.name}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, name: text }))}
                         label="Full name"
                     />
                 </Animated.View>
 
+                {/* Email input */}
                 <Animated.View
                     style={{
                         transform: [{ translateY: animations[1] }],
@@ -130,12 +147,12 @@ const SignUp = () => {
                     <CustomInput
                         placeholder="Enter your email"
                         value={form.email}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
                         label="Email"
                         keyboardType="email-address"
-                     />
+                    />
                 </Animated.View>
 
+                {/* Password input */}
                 <Animated.View
                     style={{
                         transform: [{ translateY: animations[2] }],
@@ -145,12 +162,12 @@ const SignUp = () => {
                     <CustomInput
                         placeholder="Enter your password"
                         value={form.password}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
                         label="Password"
-                        secureTextEntry
+                        secureTextEntry//so taht the pass don't appear
                     />
                 </Animated.View>
 
+                {/* Submit button */}
                 <Animated.View
                     style={{
                         transform: [{ translateY: animations[3] }],
@@ -165,6 +182,7 @@ const SignUp = () => {
                     />
                 </Animated.View>
 
+                {/* Return link */}
                 <Animated.View
                     style={{
                         transform: [{ translateY: animations[4] }],

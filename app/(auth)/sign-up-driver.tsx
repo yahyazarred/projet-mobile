@@ -1,3 +1,4 @@
+// ==================== IMPORTS ====================
 import { View, Text, Alert, KeyboardAvoidingView, Platform, Dimensions, Animated } from "react-native";
 import { Link, router } from "expo-router";
 import { useState, useRef, useEffect } from "react";
@@ -6,10 +7,15 @@ import CustomButton from "@/components/CustomButton";
 import { createUser, logout } from "@/lib/appwrite";
 import LottieView from "lottie-react-native";
 
+// Secret code required for driver registration (access control)
 const DRIVER_SECRET_CODE = "pizza4life";
 
+
+// ==================== DRIVER SIGN-UP COMPONENT ====================
 const SignUpDriver = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+//form :an object that stores form data /setForm :update the form
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -18,14 +24,14 @@ const SignUpDriver = () => {
         role: "driver",
     });
 
-    // Animated values for staggered animation
+    // Animation arrays for 6 form elements
     const animations = useRef([
-        new Animated.Value(50), // name input
-        new Animated.Value(50), // email input
-        new Animated.Value(50), // password input
-        new Animated.Value(50), // secret code input
-        new Animated.Value(50), // sign up button
-        new Animated.Value(50), // return link
+        new Animated.Value(50), // name
+        new Animated.Value(50), // email
+        new Animated.Value(50), // password
+        new Animated.Value(50), // secret code
+        new Animated.Value(50), // button
+        new Animated.Value(50), // link
     ]).current;
 
     const opacityValues = useRef([
@@ -37,6 +43,7 @@ const SignUpDriver = () => {
         new Animated.Value(0),
     ]).current;
 
+    // Staggered entrance animation
     useEffect(() => {
         const animatedSequence = animations.map((anim, i) =>
             Animated.parallel([
@@ -56,13 +63,16 @@ const SignUpDriver = () => {
         Animated.stagger(150, animatedSequence).start();
     }, []);
 
+    // Handle driver account creation
     const submit = async () => {
         const { name, email, password, secretCode, role } = form;
 
+        // Validate all fields are filled
         if (!name || !email || !password || !secretCode) {
             return Alert.alert("Error", "Please fill in all fields.");
         }
 
+        // Verify secret code matches - prevents unauthorized driver registration
         if (secretCode !== DRIVER_SECRET_CODE) {
             return Alert.alert("Access Denied", "Secret code is incorrect.");
         }
@@ -70,10 +80,15 @@ const SignUpDriver = () => {
         setIsSubmitting(true);
 
         try {
+            // Clear existing session
             await logout().catch(() => null);
+
+            // Create driver account
             await createUser({ name, email, password, role });
+
             Alert.alert("Success", "Driver account created!");
             router.replace("/sign-in");
+
         } catch (err: any) {
             Alert.alert("Error", err.message || "Something went wrong");
             console.error("Driver SignUp error:", err);
@@ -92,7 +107,7 @@ const SignUpDriver = () => {
             style={{ justifyContent: "center", paddingHorizontal: 16 }}
         >
 
-            {/* --- TOP LOTTIE ANIMATION --- */}
+            {/* ==================== HEADER ANIMATION ==================== */}
             <View
                 style={{
                     height: screenHeight / 4.5,
@@ -102,6 +117,7 @@ const SignUpDriver = () => {
                     marginTop: 85,
                 }}
             >
+                {/* Food courier/delivery animation */}
                 <LottieView
                     source={require("@/assets/animations/Food Courier.json")}
                     autoPlay
@@ -113,56 +129,57 @@ const SignUpDriver = () => {
                 />
             </View>
 
-            {/* --- FORM WITH STAGGERED ANIMATION --- */}
+            {/* ==================== SIGN-UP FORM ==================== */}
             <View className="gap-5 bg-amber-50 rounded-lg">
 
+                {/* Name input */}
                 <Animated.View
                     style={{ transform: [{ translateY: animations[0] }], opacity: opacityValues[0] }}
                 >
                     <CustomInput
                         placeholder="Enter your full name"
                         value={form.name}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, name: text }))}
                         label="Full name"
                     />
                 </Animated.View>
 
+                {/* Email input */}
                 <Animated.View
                     style={{ transform: [{ translateY: animations[1] }], opacity: opacityValues[1] }}
                 >
                     <CustomInput
                         placeholder="Enter your email"
                         value={form.email}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
                         label="Email"
                         keyboardType="email-address"
                     />
                 </Animated.View>
 
+                {/* Password input */}
                 <Animated.View
                     style={{ transform: [{ translateY: animations[2] }], opacity: opacityValues[2] }}
                 >
                     <CustomInput
                         placeholder="Enter your password"
                         value={form.password}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
                         label="Password"
                         secureTextEntry
                     />
                 </Animated.View>
 
+                {/* Secret code input - unique to driver signup */}
                 <Animated.View
                     style={{ transform: [{ translateY: animations[3] }], opacity: opacityValues[3] }}
                 >
                     <CustomInput
                         placeholder="Secret driver code"
                         value={form.secretCode}
-                        onChangeText={(text) => setForm((prev) => ({ ...prev, secretCode: text }))}
                         label="Driver secret code"
-                        secureTextEntry
+                        secureTextEntry  // Hide code input
                     />
                 </Animated.View>
 
+                {/* Submit button */}
                 <Animated.View
                     style={{ transform: [{ translateY: animations[4] }], opacity: opacityValues[4] }}
                 >
@@ -174,6 +191,7 @@ const SignUpDriver = () => {
                     />
                 </Animated.View>
 
+                {/* Return link */}
                 <Animated.View
                     style={{ transform: [{ translateY: animations[5] }], opacity: opacityValues[5] }}
                 >

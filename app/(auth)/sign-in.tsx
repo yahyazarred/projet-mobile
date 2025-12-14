@@ -1,70 +1,96 @@
-import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, Dimensions, Image, Animated } from "react-native";
+// ==================== IMPORTS ====================
+import {
+    View, Text, Alert, KeyboardAvoidingView, Platform,
+    ScrollView, Dimensions, Image, Animated
+} from "react-native";
 import { Link, router } from "expo-router";
 import CustomInput from "@/components/CustomInput";
 import CustomButton from "@/components/CustomButton";
 import { useState, useRef, useEffect } from "react";
+//useState :Stores and updates data inside a component/useRef:Keeps a value without re-rendering/useEffect:Runs code after maj
 import { signIn, logout, getCurrentUser } from "@/lib/appwrite";
 import LottieView from "lottie-react-native";
 import { images } from "@/constants";
 
+
+// ==================== SIGN-IN COMPONENT ====================
 const SignIn = () => {
+    // State for form submission loading
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // State for email and password inputs
     const [form, setForm] = useState({ email: "", password: "" });
 
-    // Animated values for staggered form animation
+    // Animation values for vertical position (translateY)
     const animations = useRef([
-        new Animated.Value(50), // email input
-        new Animated.Value(50), // password input
-        new Animated.Value(50), // sign in button
+        new Animated.Value(50), // email - starts 50px below
+        new Animated.Value(50), // password
+        new Animated.Value(50), // button
         new Animated.Value(50), // sign up link
     ]).current;
 
+    // Animation values for opacity (fade in)
     const opacityValues = useRef([
-        new Animated.Value(0),
+        new Animated.Value(0), // starts invisible
         new Animated.Value(0),
         new Animated.Value(0),
         new Animated.Value(0),
     ]).current;
 
+    // Run entrance animations on component mount
     useEffect(() => {
-        // Animate elements with stagger
+        // Create parallel animations (slide + fade) for each element
         const animatedSequence = animations.map((anim, i) =>
             Animated.parallel([
                 Animated.timing(anim, {
-                    toValue: 0,
+                    toValue: 0,                // slide to original position
                     duration: 500,
                     useNativeDriver: true,
                 }),
                 Animated.timing(opacityValues[i], {
-                    toValue: 1,
+                    toValue: 1,                // fade to fully visible
                     duration: 500,
                     useNativeDriver: true,
                 }),
             ])
         );
 
+        // Stagger animations every 150 bel wa7da bel wa7da
         Animated.stagger(150, animatedSequence).start();
     }, []);
 
-    const submit = async () => {
+    // Handle form submission
+    const submit = async () => {//Create a function and run it now.
         const { email, password } = form;
+
+        // Validate inputs
         if (!email || !password) {
             return Alert.alert("Error", "Please enter valid email address & password.");
         }
 
         setIsSubmitting(true);
         try {
+            // Clear any existing session
             await logout().catch(() => null);
+
+            // Sign in user
             await signIn({ email, password });
+
+            // Get user data to determine role
             const user = await getCurrentUser();
             if (!user) throw new Error("User not found");
 
-            // ✅ FIX: Corrected navigation paths (removed double slashes)
+            // Role-based navigation
+            // Restaurant owners → tabs2 (restaurant management interface)
             if (user.role === "restaurant_owner") {
                 router.replace("/(tabs2)/restaurant-profile");
-            } else if (user.role === "driver") {
+            }
+            // Drivers → tabs3 (delivery interface)
+            else if (user.role === "driver") {
                 router.replace("/(tabs3)/driver-profile");
-            } else {
+            }
+            // Regular customers → tabs (customer interface)
+            else {
                 router.replace("/(tabs)/profile");
             }
 
@@ -78,29 +104,33 @@ const SignIn = () => {
 
     return (
         <View className="flex-1 bg-amber-50">
+            {/* Keyboard handling wrapper */}
             <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <ScrollView className="h-full" keyboardShouldPersistTaps="handled">
 
-                    {/* --- TOP LOTTIE ANIMATION SECTION --- */}
+                    {/* ==================== HEADER ANIMATION ==================== */}
                     <View
                         className="w-full relative"
                         style={{ height: Dimensions.get("screen").height / 2.25 }}
                     >
+                        {/* Food animation (plays once) */}
                         <LottieView
                             source={require("@/assets/animations/Food & Beverage.json")}
                             autoPlay
-                            loop={false}
+                            loop={false}  // plays only once
                             style={{ width: "100%", height: "100%" }}
                         />
+                        {/* Logo positioned at bottom center */}
                         <Image
                             source={images.logo}
                             className="self-center size-60 absolute -bottom-20 z-10"
                         />
                     </View>
 
-                    {/* --- SIGN-IN FORM WITH STAGGERED ANIMATION --- */}
+                    {/* ==================== SIGN-IN FORM ==================== */}
                     <View className="gap-5 bg-amber-50 rounded-lg p-5 mt-5">
 
+                        {/* Email input with animation */}
                         <Animated.View
                             style={{
                                 transform: [{ translateY: animations[0] }],
@@ -110,13 +140,13 @@ const SignIn = () => {
                             <CustomInput
                                 placeholder="Enter your email"
                                 value={form.email}
-                                onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
                                 label="Email"
-                                keyboardType="email-address"
+                                keyboardType="email-address"  // shows email keyboard
                                 className="bg-transparent"
                             />
                         </Animated.View>
 
+                        {/* Password input with animation */}
                         <Animated.View
                             style={{
                                 transform: [{ translateY: animations[1] }],
@@ -126,13 +156,13 @@ const SignIn = () => {
                             <CustomInput
                                 placeholder="Enter your password"
                                 value={form.password}
-                                onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
                                 label="Password"
-                                secureTextEntry
+                                secureTextEntry  // hides password characters
                                 className="bg-transparent"
                             />
                         </Animated.View>
 
+                        {/* Login button with animation */}
                         <Animated.View
                             style={{
                                 transform: [{ translateY: animations[2] }],
@@ -141,12 +171,13 @@ const SignIn = () => {
                         >
                             <CustomButton
                                 title="Login"
-                                isLoading={isSubmitting}
+                                isLoading={isSubmitting}  // shows spinner when submitting
                                 onPress={submit}
                                 style="bg-red-700"
                             />
                         </Animated.View>
 
+                        {/* Sign up link with animation */}
                         <Animated.View
                             style={{
                                 transform: [{ translateY: animations[3] }],

@@ -1,7 +1,7 @@
 // lib/menuTypes.ts
 import { Models } from "react-native-appwrite";
 
-export interface MenuItem extends Models.Document {
+export interface MenuItem extends Models.Document {//interface:object/Models.Document;from the DB
     name: string;
     description: string;
     price: number;
